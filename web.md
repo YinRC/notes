@@ -1870,11 +1870,42 @@ public class SysFilter implements Filter {
 
 # 14. 超市订单管理系统
 
++ 项目包结构
+
 ![image-20230128164427846](./web.assets/image-20230128164427846.png)
 
-Server returns invalid timezone. Go to Advanced tab and set servertimezone property manually
++ Server returns invalid timezone. Go to Advanced tab and set servertimezone property manually
 
 ![image-20230128165343610](./web.assets/image-20230128165343610.png)
 
-数据库用户名，密码：root，123456
++ 数据库用户名，密码：root，123456
+
++ 关于properties文件
+
+A .properties file is a simple collection of key-value pairs that can be parsed by the [`java.util.Properties`](http://java.sun.com/javase/6/docs/api/java/util/Properties.html) class.
+
+Properties files are widely used for many purposes in all kinds of Java applications, often to store configuration or localization data.
+
++ The **forName()** method of [**java.lang.Class class**](https://www.geeksforgeeks.org/java-lang-class-class-java-set-1/) is used to get the instance of this Class with the specified class name. This class name is specified as the string parameter.
++ execute() executeQuery() executeUpdate()
+
+**The execute() method:** This method is used to execute SQL DDL statements, it returns a boolean value specifying weather the ResultSet object can be retrieved.
+
+**executeUpdate():** This method is used to execute statements such as insert, update, delete. It returns an integer value representing the number of rows affected.
+
+**executeQuery():** This method is used to execute statements that returns tabular data (example select). It returns an object of the class ResultSet.
+
++ web.xml 4.0
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="4.0" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+   http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
+
+</web-app>
+```
+
++ 
 
