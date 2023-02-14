@@ -772,6 +772,8 @@ console.log(json_decode);
 
 # 8. 面向对象编程
 
+## 8.1 原型
+
 **JS 中有原型的概念，原型可以让对象指定自己的父类**
 
 ```js
@@ -800,7 +802,11 @@ var bird = {
 jack.__proto__ = bird;
 ```
 
-**用原型化的方法添加对象的可以节约内存空间**
+事实上，一种极其常见的对象定义模式是：
+
+**在构造器（函数体）中定义属性**、**在 `prototype` 属性上定义方法**
+
+如此，构造器只包含属性定义，而方法则分装在不同的代码块，**代码更具可读性**
 
 ```js
 'use strict';
@@ -808,15 +814,533 @@ function Person(name, age) {
     this.name = name;
     this.age = age;
 }
+// 为Person对象的原型添加属性
 Person.prototype.eat = function() {
-    console.log("这个方法是所有对象共有的")
+    console.log("eat something...")
 };
-let per1 = new Person('小明', 25);
-let per2 = new Person('小红', 24);
-console.log(per1 === per2);  //false
+let person = new Person('isaiah', 18);
+console.log(person);	// 可以看到eat方法已经放到Person的原型里面了
+person.eat();	// eat something...
+```
+
+<img src="./javaScript.assets/image-20230212094541293.png" alt="image-20230212094541293" style="zoom:150%;" />
+
+
+
+```js
+'use strict';
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+// 可以被继承的方法
+Person.prototype.eat = function() {
+    console.log('can eat something...');
+};
+Person.prototype.walk = function() {
+    console.log('can do walk...');
+};
+let person = new Person('isaiah', 15);
+```
+
+<img src="./javaScript.assets/image-20230212171855322.png" alt="image-20230212171855322" style="zoom:150%;" />
+
+
+
+
+
+## 8.2 class 继承
+
+` class `关键字是在ES6 引入的
+
+1. 定义一个包含属性和方法的类
+
+```js
+'use strict';
+class Student {
+    constructor(name) {
+        this.name = name;
+    }
+    hello() {
+        alert('hello world');
+    }
+}
+
+class XioaStudent extends Student {
+    constructor(name, grade) {
+        super(name);
+        this.grade = grade;
+    }
+    myGrade() {
+        alert('xiao student: ' + this.grade + ' grade');
+    }
+}
+let xiaoming = new Student('xiaoming');
+let xiaohong = new XioaStudent('xiaohong', 3);
+```
+
+<img src="./javaScript.assets/image-20230212172040594.png" alt="image-20230212172040594" style="zoom:150%;" />
+
+**不难发现，原型对象是基于父类的**
+
+
+
+# 9. 操作BOM 对象（重点）
+
+**BOM：浏览器对象模型**
+
+**JS 和浏览器的关系：JS 诞生之初就是为了让它在浏览器中运行**
+
+
+
+**window 代表浏览器窗口**
+
+```js
+window.alert(1)
+undefined
+window.innerHeight
+1279
+window.innerWidth
+150
+window.outerHeight
+1399
+window.outerWidth
+1294
 ```
 
 
 
+**Navigator 封装了浏览器的信息**
 
+```js
+navigator.appName
+'Netscape'
+navigator.appVersion
+'5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'
+navigator.userAgent
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'
+navigator.platform
+'Win32'
+```
+
+大多数时候，我们不会使用`navigator`对象，因为这个对象可以被认为修改
+
+
+
+**screen 代表屏幕尺寸**
+
+```js
+screen.width
+2560
+screen.height
+1440
+```
+
+
+
+**location 代表当前页面的URL 信息**
+
+<img src="./javaScript.assets/image-20230213163618947.png" alt="image-20230213163618947" style="zoom:80%;" />
+
+
+
+**document 代表当前的页面，HTML DOM 文档树**
+
+```js
+document.title
+"Netflix"
+document.title = '我说叫什么名就叫什么名！！！'
+"我说叫什么名就叫什么名！！！" 
+```
+
+![image-20230213182851480](./javaScript.assets/image-20230213182851480.png)
+
+**获取具体的文档树节点**
+
+```html
+<dl id="app">
+    <dt>Java</dt>
+    <dd>JavaSE</dd>
+    <dd>JavaSE</dd>
+</dl>
+
+<script>
+    let dl = document.getElementById('app');
+</script>
+```
+
+**获取 cookies**
+
+```properties
+document.cookie
+"nfvdid=BQFmAAEBEBEz7ImlB0MYQXjYhvmkeBtgMlw7OFlR7Xxm9HpBCvQ-DKlfDMDHu7BaKTaZsE-Hd2IfbIXSF4E4KU-K3aXikX59KKQiKlfNbaHbfBns-uG3X__N1aZmD7_ECuwzUSlor1GjE18n4GWZF5joJIaN54AR; memclid=47c68057-2ee9-4fce-ac46-c1ff7d3b38e2; OptanonAlertBoxClosed=2022-02-25T07:35:39.555Z; netflix-sans-normal-3-loaded=true; netflix-sans-bold-3-loaded=true; flwssn=c1e1f544-98b8-4110-9ff2-346ace2470a6; OptanonConsent=isIABGlobal=false&datestamp=Mon+Feb+13+2023+18%3A16%3A27+GMT%2B0800+(%E4%B8%AD%E5%9B%BD%E6%A0%87%E5%87%86%E6%97%B6%E9%97%B4)&version=202301.1.0&consentId=43ad38a2-b097-4c16-8de4-d20de9bafca3&interactionCount=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&hosts=&AwaitingReconsent=false&geolocation=HK%3BHCW&isGpcEnabled=0; profilesNewSession=0" 
+```
+
+使用document 可以轻易地获得cookie 的信息，所以要小心恶意的脚本劫持cookie
+
+
+
+**history 代表浏览器的历史记录**
+
+```js
+history.back() // 后退 back
+history.forward() // 前进 forward
+```
+
+![image-20230213184448004](./javaScript.assets/image-20230213184448004.png)
+
+
+
+# 10. 操作 DOM对象（重点）
+
+**浏览器网页就是一个 DOM 树形结构**
+
++ **更新**：更新 DOM 节点
++ **遍历**：得到任意的 DOM 节点
++ **删除**：移除一个 DOM 节点
++ **添加**：添加一个新的 DOM 节点
+
+
+
+### 获得 DOM 节点（选择器）
+
+```html
+<div id="father">
+    <h1>标题一</h1>
+    <p id="p1">p1</p>
+    <p class="p2">p2</p>
+</div>
+```
+
+```js
+// 类型选择器
+let h1 = document.getElementsByTagName('h1');
+// id 选择器
+let p1 = document.getElementById('p1');
+// class 属性选择器
+let p2 = document.getElementsByClassName('p2');
+
+// 获取父节点下的所有子节点
+let father = document.getElementById('father');
+let children = father.children;
+// 指定的孩子
+father.firstChild
+father.lastChild
+```
+
+以上是原生代码的写法，之后尽量用JS 的一个常用的库 jQurey
+
+<img src="./javaScript.assets/image-20230213190522017.png" alt="image-20230213190522017" style="zoom:150%;" />
+
+**注意：getElementsByTagName / ClassName 是有复数的，getElementById 是没有复数的**
+
+
+
+### 更新节点（文本和样式）
+
+```ja
+let id1 = document.getElementById('id1');
+id1.innerText = '在标签内部添加文本';
+id1.innerHTML = '<span style="color:indianred">在标签里面加入标签</span>';
+```
+
+操作文本：`innerText 属性` `innerHTML 属性`
+
+操作CSS：`style.color` `style.fontsize` `style.padding`
+
+**注意：这里的属性都是接收字符串类型的**
+
+
+
+### 删除节点（remove）
+
++ 先获取父节点，再通过父节点删除指定的节点 parentElement / removeChild
++ 直接用 remove 方法
+
+```html
+<div id="father">
+    <h1>标题一</h1>
+    <p id="p1">p1</p>
+    <p class="p2">p2</p>
+</div>
+
+<script>
+    let self = document.getElementById('p1');
+    let father = self.parentElement;
+    father.removeChild(self);
+    document.getElementsByClassName('p2')[0].remove();
+</script>
+```
+
+**注意：删除是一个动态的过程，是一行一行边解释边执行的**
+
+```html
+<script>
+    let father = document.getElementById('father');
+
+    father.removeChild(father.children[0]);
+    father.removeChild(father.children[1]);
+    father.removeChild(father.children[2]);
+</script>
+```
+
+<img src="./javaScript.assets/image-20230213194255971.png" alt="image-20230213194255971" style="zoom:200%;" />
+
+<img src="./javaScript.assets/image-20230213194526429.png" alt="image-20230213194526429" style="zoom:150%;" />
+
+
+
+### 插入节点（css script div...）
+
+获得了某个 DOM 节点，如果原来就有 innerHTML 再去添加，就会覆盖，我们可以选择追加
+
+```html
+<p id="js">JavaScript</p>
+<div id="list">
+    <p id="se">JavaSE</p>
+    <p id="ee">JavaEE</p>
+    <p id="me">JavaME</p>
+</div>
+
+<script>
+    let js = document.getElementById('js');
+    let list = document.getElementById('list');
+    list.appendChild(js);
+</script>
+```
+
+原始的 html 文件
+
+![image-20230213203204298](./javaScript.assets/image-20230213203204298.png)
+
+JS 改变之后的 html 文件
+
+![image-20230213203225602](./javaScript.assets/image-20230213203225602.png)
+
+```html
+<p id="js">JavaScript</p>
+<div id="list">
+    <p id="se">JavaSE</p>
+    <p id="ee">JavaEE</p>
+    <p id="me">JavaME</p>
+</div>
+
+<script>
+    let js = document.getElementById('js');
+    let list = document.getElementById('list');
+
+    // 通过 JS 创建一个新的节点
+    let newP = document.createElement('p'); // 创建一个 p 标签
+    newP.id = 'newP';
+    newP.innerText = 'hello new p tag';
+    document.getElementById('list').appendChild(newP);
+
+    // 通过 JS 创建一个 JS 标签
+    let myScript = document.createElement('script');
+    // setAttribute 为属性设置值
+    myScript.setAttribute('type', 'text/javaScript');
+    myScript.innerText = `alert('hello world from myScript')`;
+    document.getElementsByTagName('head')[0].appendChild(myScript);
+
+    // 通过 JS 可以创建 Style 标签，改变样式
+    let myStyle = document.createElement('style');
+    myStyle.setAttribute('type', 'text/css');
+    myStyle.innerText = `body {border: solid 2px red;}`;
+    document.getElementsByTagName('head')[0].appendChild(myStyle);
+</script>
+```
+
+![image-20230213210143429](./javaScript.assets/image-20230213210143429.png)
+
+<img src="./javaScript.assets/image-20230213210120166.png" alt="image-20230213210120166" style="zoom:150%;" />
+
+
+
+# 11. 操作表单（form）
+
++ 文本框 text
++ 下拉框 \<select\>
++ 单选框 radio
++ 多选框 checkbox
++ 隐藏域 hidden
++ 密码框 password
+
+### 表单控制（radio text）
+
+```html
+<form action="#" method='post'>
+    <p>
+    	<span>用户名：</span>
+		<input type="text" id="user-name-label">
+    </p>
+	<p>
+        <span>性别：</span>
+    	<input type="radio" name="sex" value="male" id="sex-radio-male">
+        <input type="radio" name="sex" vale="female" id="sex-radio-female">
+     </p>
+</form>
+
+<script>
+    let userName = document.getElementById('user-name-label');
+    
+	// 得到输入框的值（type="text"）
+    console.log(userName.value);
+    // 修改输入框中的值
+    userName.value = 'isaiah';
+
+    // 对于单选框，多选框等固定的value值
+    // 就应该用checked来查看或修改结果
+    console.log(document.getElementById('sex-radio-male').checked);
+    document.getElementById('sex-radio-female').checked = true;
+</script>
+```
+
+### 提交表单（md5）
+
+**表单绑定提交事件：onsubmit=提交监测函数（函数放回 true[可以提交] 或 false[不可以提交]）**
+
+**onsubmit= “return aaa()”**
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.js"></script>
+
+<form method="post" action="https://bing.com" onsubmit="return aaa()">
+    <p>
+        <span>用户名：</span>
+        <input type="text" id="user-name-label" name="user-name">
+    </p>
+    <p>
+        <span>密码：</span>
+        <input type="password" id="input-password" name="password">
+    </p>
+    <input type="hidden" id="md5-password">
+    <!--        绑定事件：onclick 被点击就提交-->
+    <button type="submit">提交</button>
+</form>
+
+<script>
+        function aaa() {
+            alert('inside aaa()');
+            let userName = document.getElementById('user-name-label');
+            let passWord = document.getElementById('input-password');
+            let md5PassWord = document.getElementById('md5-password');
+
+            md5PassWord.value = md5(passWord.value);
+            passWord.value = md5PassWord;
+            return true;
+        }
+</script>
+```
+
+![image-20230214130934416](./javaScript.assets/image-20230214130934416.png)
+
+
+
+# 12. jQuery	$(selector).action()
+
+![image-20230214131553562](./javaScript.assets/image-20230214131553562.png)
+
+## 12.1 简单了解
+
+点击“click me” 链接，得到“hello world from jQuery” 弹窗
+
+```html
+<script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+<a href="" id="test-jQuery">click me!</a>
+<script>
+    $('#test-jQuery').click(function() {
+    	alert('hello world from jQuery');
+	});
+</script>
+```
+
+**$(选定区域).响应/作出动作**
+
++ 选定canvas区域，响应鼠标移动事件，通过事件得到此时鼠标得坐标位置
++ 选定mouseMove区域，输出文本（鼠标的坐标位置）
+
+```html
+<script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+<style>
+    #canvas {
+        width: 500px;
+        height: 500px;
+        border: solid 1px red;
+    }
+</style>
+
+<div>
+    mouse: <span id="mouseMove"></span>
+</div>
+<div id="canvas">
+    请在这里移动鼠标
+</div>
+
+<script>
+    // 当网页元素加载完毕之后，响应事件
+    $(function() {
+        $('#canvas').mousemove(function(e) {
+            $('#mouseMove').text('x: ' + e.pageX + 'y: ' + e.pageY)
+        })
+	});
+</script>
+```
+
+![image-20230214141113093](./javaScript.assets/image-20230214141113093.png)
+
+## 12.2 操作 DOM
+
+```html
+<ul>
+    <li name="python">python no.1</li>
+    <li name="java">java no.1</li>
+    <li name="c++">c++ no.1</li>
+    <li name="golang">go no.1</li>
+</ul>
+```
+
+### 节点文本操作（text html）
+
+```js
+$('ul li[name=java]').text();
+'java no.1'
+
+$('ul li[name=java]').text('java no.2');
+E.fn.init [li, prevObject: E.fn.init(1)]0: lilength: 1prevObject: E.fn.init [document][[Prototype]]: Object(0)
+
+$('ul').html();
+'\n        <li name="python">python no.1</li>\n        <li name="java">java no.2</li>\n        <li name="c++">c++ no.1</li>\n        <li name="golang">go no.1</li>\n    '
+
+$('ul').html('<strong>123</strong>');
+E.fn.init [ul, prevObject: E.fn.init(1)]
+```
+
+### 操作 CSS	.css(‘key’, ‘value’)
+
+```js
+$('ul li[name=python]').css('color', 'red');
+E.fn.init [li, prevObject: E.fn.init(1)]
+```
+
+![image-20230214142746915](./javaScript.assets/image-20230214142746915.png)
+
+### 元素的显示与隐藏（display: none）
+
+```js
+$('ul li[name=c\\+\\+]').hide();
+E.fn.init [li, prevObject: E.fn.init(1)]
+$('ul li[name=c\\+\\+]').show();
+E.fn.init [li, prevObject: E.fn.init(1)]
+```
+
+![image-20230214143341077](./javaScript.assets/image-20230214143341077.png)
+
+### 娱乐测试
+
+```js
+$(window).width();
+$(window).height();
+$('ul li[name=python]').toggle();
+```
 
