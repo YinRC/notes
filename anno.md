@@ -165,15 +165,15 @@ function f() {
 
 # 5. Java 反射机制
 
-反射机制允许程序在运行期借助 Reflection API 取得类的所有信息，并能直接操作任意对象的内部属性及方法。
+反射机制允许程序在**运行期**借助 Reflection API **取得类的所有信息**，并能**直接操作任意对象的内部属性及方法**
 
 ```java
 Class c = Class.forName("java.lang.String");
 ```
 
-类被加载完成之后，堆栈中就产生了一个 **Class 类型的对象**（一个类只有一个 Class 对象），这个对象就包含了完整的类的结构信息。我们可以通过这个对象看到类的结构。这个对象就像是类的一面镜子，由此可以看到类的结构。所以这种获取信息的方式称之为反射。
+**类被加载完成之后**，**堆栈**中就产生了一个 **Class 类型的对象**（一个类只有一个 Class 对象），这个对象就包含了完整的类的结构信息。我们可以通过这个对象看到类的结构。这个对象就像是类的一面镜子，由此可以看到类的结构。所以**这种获取信息的方式称之为反射**
 
-**Object 类中定义了 getClass()  方法**，此方法将被所有子类继承
+**Object 类中定义了 getClass()  方法**，此方法将被**所有子类继承**
 
 ```java
 package com.isaiah.reflect;
@@ -248,67 +248,67 @@ class User {
 
 **反射方式**：实例化对象 ——> getClass() 方法 ——> 得到完整的 “包类” 名称
 
-+ 在运行时判断任意一个对象所属的类
-+ 在运行时构造任意一个类的对象
-+ 在运行时判断任意一个类所具有的成员变量和方法
-+ 在运行时获取泛型信息
-+ 在运行时调用任意一个对象的成员变量和方法
-+ 在运行时处理注解
-+ 生成动态代理 AOP
++ 在运行时**判断任意一个对象所属的类**
++ 在运行时**构造任意一个类的对象**
++ 在运行时**判断任意一个类所具有的成员变量和方法**
++ 在运行时**获取泛型信息**
++ 在运行时**调用任意一个对象的成员变量和方法**
++ 在运行时**处理注解**
++ 生成**动态代理 AOP**
 
 **优点**：可以实现动态创建对象和编译，体现出很大的灵活性
 
-**缺点**：对性能有影响。使用反射大部分是一种解释操作，其比直接执行慢得多
+**缺点**：对性能有影响。使用反射**大部分是一种解释操作**，其比直接执行慢得多
 
 **java.lang.Class**：代表一个类
 
-**java.lang.reflect.Method**：代表类的方法
+**java.lang.reflect.Method**：代表类的**方法**
 
-**java.lang.reflect.Field**：代表类的成员变量
+**java.lang.reflect.Field**：代表类的**成员变量**
 
-**java.lang.reflect.Constructor**：代表类的构造器
+**java.lang.reflect.Constructor**：代表类的**构造器**
 
 
 
 # 6. Class 类
 
-+ Class 本身也是一个类
-+ Class 对象只能由系统建立
-+ 一个加载的类在 JVM 中只会有一个 Class 实例
-+ 一个 Class 对象对应的是一个加载到 JVM 中的一个 class 文件
-+ 每个类的实例都会记得自己是由哪个 Class 实例所生成
++ **Class 本身也是一个类**
++ Class 对象**只能由系统建立**
++ **一个加载的类在 JVM 中只会有一个 Class 实例**
++ 一个 Class 对象**对应的是一个加载到 JVM 中的一个 class 文件**
++ 每个**类的实例**都会记得自己是由哪个 **Class 实例**所生成
 + 通过 Class 对象可以完整地得到一个类中的所有的被加载的结构
-+ Class 类是 Reflection 的根源，针对任何想要动态加载、运行的类，唯有先获得相应的 Class 对象
++ Class 类是 Reflection 的根源，**针对任何想要动态加载、运行的类，唯有先获得相应的 Class 对象**
 
-**static Class forName(String name)**：返回指定类名的 Class 对象
+**static Class forName(String name)**：==返回指定类名的 Class 对象==
 
-**Object newInstance()**：调用构造函数，返回 Class 对象的一个实例
+**Object newInstance()**：==调用构造函数，返回 Class 对象的一个实例==
 
-**getName()**：返回此 Class 对象所表示的实体（类，接口，数组类型，void）的名称
+**getName()**：==返回此 Class 对象所表示的实体（类，接口，数组类型，void）的名称==
 
 **Class getSuperClass()**：返回当前 Class 对象的父类的 Class 对象
 
-**Class[] getinterfaces()**：获取当前 Class 对象的接口
+**Class[] getinterfaces()**：==获取当前 Class 对象的接口==
 
-**ClassLoader getClassLoader()**：返回该类的类加载器
+**ClassLoader getClassLoader()**：==返回该类的类加载器==
 
-**Constructor[] getConstructors()**：返回一个包含Constructor对象的数组
+**Constructor[] getConstructors()**：==返回一个包含Constructor对象的数组==
 
-**Method getMethod(String name, Class.. T)**：返回一个Method对象，此对象的形参类型为paramType
+**Method getMethod(String name, Class.. T)**：==返回一个Method对象，此对象的形参类型为paramType==
 
-**Field[] getDelcaredFields()**：返回Field对象的一个数组
+**Field[] getDelcaredFields()**：==返回Field对象的一个数组==
 
 > 获得 Class 类的实例
 >
-> a）已知具体的类，通过类的class属性获取，性能最高
+> a）**已知具体的类：**通过类的class属性获取，性能最高
 >
-> b）已知实例，调用getClass()方法获取Class对象
+> b）**已知实例：**调用getClass()方法获取Class对象
 >
-> c）已知类的全类名，且在该类的路径下，可通过Class类的静态方法forName()获取，可能抛出ClassNotFoundException
+> c）**已知类的全类名，且在该类的路径下：**可通过Class类的静态方法forName()获取，**可能抛出ClassNotFoundException**
 >
-> d）基本数据类型可以直接 类名.Type
+> d）**基本数据类型：**可以直接 类名.Type
 >
-> e）可以用类加载器ClassLoader
+> e）可以用**类加载器ClassLoader**
 
 ```java
 package com.isaiah.reflect;
@@ -318,11 +318,15 @@ public class Test3 {
         Person person = new Student();
         System.out.println("this man is a/an " + person.name);
 
-        // get class instance 1
+        // get class instance a)
+        Class<Student> c3 = Student.class;
+        System.out.println(c3.hashCode());
+        
+        // get class instance b)
         Class<?> c1 = person.getClass();
         System.out.println(c1.hashCode());
 
-        // get class instance 2
+        // get class instance c)
         try {
             Class<?> c2 = Class.forName("com.isaiah.reflect.Student");
             System.out.println(c2.hashCode());
@@ -330,11 +334,7 @@ public class Test3 {
             e.printStackTrace();
         }
 
-        // get class instance 3
-        Class<Student> c3 = Student.class;
-        System.out.println(c3.hashCode());
-
-        // get class instance 4
+        // get class instance d)
         Class<Integer> c4 = Integer.TYPE;
         System.out.println(c4);
         System.out.println(int.class);
@@ -413,35 +413,35 @@ public class Test4 {
 
 # 7. 类加载内存分析
 
-Java 内存由堆、栈、方法区构成
+==Java 内存由堆、栈、方法区构成==
 
-**堆**：存放 new 出来的对象和数组，可以被所有线程共享
+**堆**：存放 **new 出来的对象和数组**，可以被所有线程共享
 
-**栈**：存放基本类型（包含基本类型的具体数值）对象的引用（会存放这个对象在堆中的地址）
+**栈**：存放**基本类型**（**会存放基本类型的具体数值**）**对象的引用**（**会存放这个对象在堆中的地址**）
 
-**方法区**：可以被所有线程共享，包含了所有 class 和 static 变量
+**方法区**：可以被所有线程共享，**包含了所有 class 和 static 变量**
 
 
 
 类的加载过程：
 
-类的加载 ——> 类的链接 ——> 类的初始化
+==类的加载 ——> 类的链接 ——> 类的初始化==
 
-**类的加载**：将类的class文件读入内存，并为之创建一个java.lang.Class对象。此过程由类加载器完成
+**类的加载**：==将类的**class文件**读入内存，并为之创建一个**java.lang.Class对象**，此过程由**类加载器**完成==
 
-**类的链接**：将类的二进制数据合并到 JRE 中
+**类的链接**：==将类的二进制数据**合并到 JRE** 中==
 
-**类的初始化**：JVM 负责对类进行初始化
+**类的初始化**：==**JVM** 负责对类进行初始化==
 
 
 
 类的加载和ClassLoader的理解：
 
-**加载**：将class文件中的字节码内容加载到内存中，并将这些静态数据转化为方法区的运行时数据结构，最后生成一个代表这个类的 java.lang.Class 对象（因此不能够主动创建class对象，而只能获取）
+**加载**：将**class文件中的字节码**内容加载到内存中，并将这些**静态数据转化为方法区的运行时数据结构**，最后**生成一个代表这个类的 java.lang.Class 对象**（因此==不能够主动创建class对象，而只能获取==）
 
-**链接**：确保加载的类信息符合 JVM 规范，没有安全方面的问题（验证阶段）正式为类变量（static）分配内存并设置类变量的默认初始值，内存将在方法去中分配（准备阶段）虚拟机常量池内的符号引用（常量名）替换为直接引用（地址）（解析阶段）
+**链接**：确保加载的类信息符合 JVM 规范，没有安全方面的问题（验证阶段）正式**为类变量（static）分配内存并设置类变量的默认初始值**，内存将在方法区中分配（准备阶段）虚拟机**常量池内的符号引用（常量名）替换为直接引用（地址）**（解析阶段）
 
-**初始化**：执行类构造器<clinit>() 方法的过程。类构造器私有编译器收集的类变量的赋值动作和静态代码块中的语句合并而成的（类构造器是构造类的，不是构造类对象的构造器）当初始化一个类时，若发现其父类还没有进行初始化，就先初始化父类。虚拟机会保证一个类的<clinit>() 方法在多线程的环境中被正确加锁或同步
+**初始化**：执行**类构造器<clinit>()** 方法的过程。类构造器私有编译器收集的**类变量的赋值动作和静态代码块中的语句**合并而成的（类构造器是构造类的，不是构造类对象的构造器）**当初始化一个类时，若发现其父类还没有进行初始化，就先初始化父类**。虚拟机会保证一个类的<clinit>() 方法在多线程的环境中被正确加锁或同步
 
 ```java
 package com.isaiah.reflect;
@@ -479,17 +479,17 @@ class A {
 
 **类的主动引用**（发生类的初始化）：
 
-+ 当虚拟机启动时，先初始化 main 方法所在的类
-+ new 一个类的对象（为一个类的对象分配空间）
-+ 调用类的静态成员（除了 final 常量）和静态方法
-+ 使用 java.lang.reflect 包中的方法对类进行反射调用
-+ 当初始化一个类时，其父类还没有被初始化，则先初始化其父类
++ 当虚拟机启动时，==先初始化 main 方法所在的类==
++ ==new 一个类的对象==（为一个类的对象分配空间）
++ ==调用类的静态成员（除了 final 常量）和静态方法==
++ ==使用 java.lang.reflect 包中的方法对类进行反射调用==
++ ==当初始化一个类时，其父类还没有被初始化，则先初始化其父类
 
 **类的被动引用**（不会发生类的初始化）：
 
-+ 当访问一个静态域时，只有声明这个域的那个类会被初始化（若子类引用父类的静态变量，此举不会导致子类的初始化）
-+ 通过数组定义类引用，不会触发此类的初始化
-+ 引用常量不会导致此类的初始化（常量在链接阶段就存入调用类的常量池中了）
++ 当访问一个静态域时，只有声明这个域的那个类会被初始化（==若子类引用父类的静态变量，此举不会导致子类的初始化==）
++ ==通过数组定义类引用，不会触发此类的初始化==
++ ==引用常量不会导致此类的初始化==（常量在链接阶段就存入调用类的常量池中了）
 
 ```java
 package com.isaiah.reflect;
@@ -544,11 +544,11 @@ class Son extends Father {
 
 类加载器（classloader）的类型（JVM规范定义）：
 
-**引导类加载器（Bootstrap）**：用 C++ 编写，是 JVM 自带的类加载器，负责 Java 平台核心类库。该加载器无法直接获取
+**引导类加载器（Bootstrap）**：用 C++ 编写，是 JVM 自带的类加载器，负责 ==Java 平台核心类库==，**该加载器无法直接获取**
 
-**扩展类加载器（Extension）**：负责 jre/lib/ext 目录下的 jar 包或 -D java.ext.dirs 指定目录下的 jar 包
+**扩展类加载器（Extension）**：负责 ==jre/lib/ext 目录下的 jar 包或 -D java.ext.dirs== 指定目录下的 jar 包
 
-**系统类加载器（app/system）**：负责 -classpath 或 -D java.class.path 所指目录下的类与 jar 包，是最常用的类加载器
+**系统类加载器（app/system）**：负责 ==-classpath 或 -D java.class.path== 所指目录下的类与 jar 包，**是最常用的类加载器**
 
 ```java
 package com.isaiah.reflect;
@@ -617,6 +617,11 @@ public class Test7 {
 
 
 # 10. 获得类的运行时结构
+
++ 获得**类的名字：**getName()	getSimpleName()
++ 获得**类的属性：**getDeclaredFields()     getFields()    getDeclaredField
++ 获得**类的方法：**getMethods()    getDeclaredMethods()    getMethod()
++ 获得**构造方法：**getConstructors()    getDeclaredConstructors()    getDeclaredConstructor
 
 ```java
 package com.isaiah.reflect;
@@ -695,13 +700,13 @@ public class Test8 {
 
 
 
-# 11. 动态创建对象invoke&set
+# 11. 动态创建对象invoke & set
 
-Method，Field，Constructor对象都有setAccessible() 方法
+==Method，Field，Constructor对象都有setAccessible()== 方法
 
-此方法的作用是启用或禁用 访问安全检查
+此方法的作用是启用或禁用 ==访问安全检查==
 
-+ true：提高反射的效率（必须有反射的话建议打开）、使得原来无法访问的私有成员也可以被访问
++ true：提高反射的效率（必须有反射的话建议打开）、使得**原来无法访问的私有成员也可以被访问**
 + false：即指示反射的对象应执行Java 访问安全检查（默认）
 
 ```java
@@ -825,7 +830,7 @@ public class Test10 {
 反射方法 + accessTrue ：1265ms
 ```
 
-Java 采用**泛型擦除**的机制，即泛型仅仅是给编译器 javac 使用的，确保数据的安全性，免去强制类型转化的问题，一旦编译完成所有泛型都会被擦除
+Java 采用**泛型擦除**的机制，即泛型仅仅是给编译器 javac 使用的，确保数据的安全性，免去强制类型转化的问题，==一旦编译完成所有泛型都会被擦除==
 
 为了通过反射操作泛型，Java 新增了几种类型：
 
@@ -885,6 +890,8 @@ public class Test11 {
 
 
 # 13. 反射操作注解
+
+getAnnotations()    getAnnotation()
 
 ```java
 package com.isaiah.reflect;
