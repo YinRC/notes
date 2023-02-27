@@ -2,9 +2,37 @@
 
 ## 1.1 连接数据库
 
++ 在 MySql 官网下载 Windows (x86, 64-bit), ZIP Archive
++ 在指定路径下解压
++ 在 mysql 程序路径下，新建 `my.ini` 文件
++ 在客户端设置默认字符集
++ 在服务端（mysqld）设置 `basedir` 和 `datadir`，服务端字符集设置，引擎设置
+
+注意：utf8 这里是没有短横线的
+
+```ini
+[client]
+default-character-set=utf8
+
+[mysqld]
+port=3306
+basedir=D:\\Environment\\mysql-winx64
+datadir=D:\\Environment\\mysql-winx64\\sqldata
+character-set-server=utf8
+default-storage-engine=INNODB
+```
+
++ 之后在 mysql 路径下的 bin 文件夹中，`以管理员权限打开 cmd`
++ 执行 `mysqld --initialize --console` 初始化 mysql 服务
++ 注意，此时会在显示 `[Note]` 行中显示 mysql 临时为 root 用户生成的密码
++ 执行 `mysqld intall` 安装 mysql 服务
++ 执行 `net start mysql` 来开启 mysql 服务端
++ 执行 `mysql -h 主机名 -u 用户名 -p密码` 来进行登录
+
 ```sql
 mysql -uroot -p123456 -- 连接数据库
 update mysql.user set authentication_string('123456') where user='root' and Host='localhost'; -- 修改用户密码
+alter user 'root'@'localhost' identified by '123456' -- 修改密码
 flush privileges -- 刷新权限
 
 -- 所有的语句都使用分号结尾
