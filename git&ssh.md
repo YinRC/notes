@@ -14,7 +14,8 @@
 + **Public key –** Everyone can see it, no need to protect it. (for encryption function)
 
 + **Private key –** Stays in computer, must be protected. (for decryption function)
-+ 
+
+  
 
 ## 2. windows 的前期准备
 
@@ -29,10 +30,38 @@
 `@`前是远程服务器 win 主机的登录名，`@`后是该服务器的 IP 地址
 
 
+## 3. ssh-keygen
 
-## 3. ssh-agent
+进入到 ~/.ssh 目录（windows 下为 C:\users\1203）
 
-ssh agent，意为 **ssh 代理**，是一个**客户端密钥管理器**
+打开 git bash 输入命令
+
+```bash
+# -t 指定生成密钥所用的算法 -C 指定邮箱作为标签
+$ ssh-keygen -t ed25519 -C "your_email@example.com"
+# id_ALGORITHM 可以换成 id_isaiah 否则会有同名的困扰
+> Enter a file in which to save the key (/c/Users/YOU/.ssh/id_ALGORITHM):[Press enter]
+> Enter passphrase (empty for no passphrase): [Type a passphrase]
+> Enter same passphrase again: [Type passphrase again]
+```
+
+> ```txt
+> -C comment
+> 			Provides a new comment.
+> ```
+
+命令执行之后会生成 id_isaiah 私钥 和 id_isaiah.pub 公钥
+
+把私钥交给 ssh-agent 管理
+
+```bash
+$ ssh-add ~/.ssh/id_ed25519
+```
+
+
+## 4. ssh-agent
+
+ssh agent 意为 **ssh 代理**，是一个**客户端密钥管理器**
 
 ssh-agent 是 ssh 默认的代理，Pageant 是客服端 PuTTY 的代理
 
@@ -68,33 +97,7 @@ Shell中的 test 命令用于检查某个条件是否成立，它可以进行数
 
 
 
-## 4. ssh-keygen
 
-进入到 ~/.ssh 目录（windows 下为 C:\users\1203）
-
-打开 git bash 输入命令
-
-```bash
-# -t 指定生成密钥所用的算法 -C 指定邮箱作为标签
-$ ssh-keygen -t ed25519 -C "your_email@example.com"
-# id_ALGORITHM 可以换成 id_isaiah 否则会有同名的困扰
-> Enter a file in which to save the key (/c/Users/YOU/.ssh/id_ALGORITHM):[Press enter]
-> Enter passphrase (empty for no passphrase): [Type a passphrase]
-> Enter same passphrase again: [Type passphrase again]
-```
-
-> ```txt
-> -C comment
-> 			Provides a new comment.
-> ```
-
-命令执行之后会生成 id_isaiah 私钥 和 id_isaiah.pub 公钥
-
-把私钥交给 ssh-agent 管理
-
-```bash
-$ ssh-add ~/.ssh/id_ed25519
-```
 
 
 
@@ -161,15 +164,52 @@ git rm --cached note.txt 从暂存区删除
 
 
 
-## 7. error
+## 7. 异常情况
+
+### 7.1 ssh-add 异常
 
 ssh-add returns with: "Error connecting to agent: No such file or directory"
+
+说明 ssh-agent 没有打开，不能使用 ssh-add 功能来添加私钥到 ssh-agent
 
 ![image-20230309231407853](git&ssh.assets/image-20230309231407853.png)
 
 
 
-![image-20230310001831596](git&ssh.assets/image-20230310001831596.png)
+
+
+### 7.2 no clone 但想要提交到远程仓库
 
 ![image-20230310001857030](git&ssh.assets/image-20230310001857030.png)
 
+
+
+### 7.3 github 拒绝了对 22 端口的访问
+
+ssh: connect to host github.com port 22: Connection refused
+
+```bash
+$ git pull
+ssh: connect to host github.com port 22: Connection refused
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+```
+
+**解决方法：**
+
+使用 github 的 443 端口，也即使用 https 的端口
+
+~~~bash
+$ vim ~/.ssh/config
+```
+# Add section below to it
+Host github.com
+  Hostname ssh.github.com
+  Port 443
+```
+$ ssh -T git@github.com
+Hi xxxxx! You've successfully authenticated, but GitHub does not
+provide shell access.
+~~~
