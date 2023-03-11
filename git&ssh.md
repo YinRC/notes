@@ -213,3 +213,17 @@ $ ssh -T git@github.com
 Hi xxxxx! You've successfully authenticated, but GitHub does not
 provide shell access.
 ~~~
+
+
+
+### 7.4 github 公钥拒绝
+
+GitHub's Permission denied (publickey) error
+
+原因是没有在 ssh-agent 中添加对应的私钥
+
+每次使用 ssh 服务都要添加一次很是麻烦，尤其是考虑到有多个私钥的情况
+
+解决办法是在 ~/.ssh/config 中配置相关的属性，把私钥和 github.com 对应上
+
+![image-20230311112336851](git&ssh.assets/image-20230311112336851.png)
