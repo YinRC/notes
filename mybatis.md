@@ -46,8 +46,11 @@
 # 1. 环境及其测试
 
 + 创建maven项目
-
 + 引入mybatis依赖和mysql驱动
+  + mysql:mysql-connector-java:5.1.47
+  + org.mybatis:mybatis:3.5.2
+  + junit:junit:4.12(test)
+
 
 + mybatis的主配置文件
 
