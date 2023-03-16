@@ -116,72 +116,10 @@ ${msg}
 
 # 2. SpringMVC 概要
 
-```xml
-<dependencies>
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.12</version>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-webmvc</artifactId>
-        <version>5.3.24</version>
-    </dependency>
-    <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.5</version>
-    </dependency>
-    <dependency>
-        <groupId>javax.servlet.jsp</groupId>
-        <artifactId>jsp-api</artifactId>
-        <version>2.2</version>
-    </dependency>
-    <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>jstl</artifactId>
-        <version>1.2</version>
-    </dependency>
-</dependencies>
-```
+SSM：MyBatis + Spring + SpringMVC
 
-先创建一个 project，删掉 src 文件夹，配置公共的依赖，之后新建 module
+MVC：模型（dao，service）视图（jsp）控制器（servlet）
 
-
-
-# 2. 回顾 Servlet
-
-从一个空白的 maven 项目开始，add framework support -> web application
-
-![image-20230301150938164](./springMVC.assets/image-20230301150938164.png)
-
-![image-20230301151155806](./springMVC.assets/image-20230301151155806.png)
-
-就会得到 4.0 版本的 web.xml
-
-![image-20230301151418674](./springMVC.assets/image-20230301151418674.png)
-
-
-
-+ 前端获取提交的信息 http://localhost:8080/springmvc_01_servlet_war_exploded/hello?method=add
-
-```jsp
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-<head>
-    <title>$Title$</title>
-</head>
-<body>
-    <form action="${pageContext.request.contextPath}/hello" method="post">
-        <label>
-            <input type="text" name="method"/>
-        </label>
-        <input type="submit"/>
-    </form>
-</body>
-</html>
-=======
 SpringMVC 三大件：**处理器映射器**，**处理器适配器**，**视图解析器**
 
 ```sql
@@ -246,45 +184,10 @@ insert into `user`(`id`, `name`, `pwd`) VALUES(3, '王五', '123');
         <servlet-name>springmvc</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
->>>>>>> 15841d7d1bd9cc27c4c1cb96c165cd53aca6ae35
 ```
 
 
 
-<<<<<<< HEAD
-+ 编写后台处理的程序 HelloServlet
-
-```java
-package com.isaiah.servlet;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-// HttpServlet 的父类实现了 Servlet 接口
-public class HelloServlet extends HttpServlet {
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // 1. 获取前端参数
-        String method = req.getParameter("method");
-        if ("add".equals(method)) {
-            req.getSession().setAttribute("msg", "执行了 add 方法");
-        }
-        if ("delete".equals(method)) {
-            req.getSession().setAttribute("msg", "执行了 delete 方法");
-        }
-        // 2. 调用业务层 service
-
-        // 3. 页面转发或重定向
-        req.getRequestDispatcher("/WEB-INF/jsp/test.jsp").forward(req, resp);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(req, resp);
-=======
 ## 2.3 springmvc-servlet.xml
 
 ==springmvc-servlet.xml:	处理器映射器（HandlerMapping）==
@@ -347,60 +250,28 @@ public class HelloController implements Controller {
         // 视图跳转：封装要跳转的视图
         mv.setViewName("test");    // /WEB-INF/jsp/test.jsp
         return mv;
->>>>>>> 15841d7d1bd9cc27c4c1cb96c165cd53aca6ae35
     }
 }
 ```
 
 
 
-<<<<<<< HEAD
-+ 后端命令从当前页面转发到另一个页面，用 EL 表达式得到通过 session 传递来的数据
-=======
 ## 2.5 test.jsp
->>>>>>> 15841d7d1bd9cc27c4c1cb96c165cd53aca6ae35
 
 ```jsp
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-<<<<<<< HEAD
-    <title>$Title$</title>
-</head>
-<body>
-${msg}
-=======
     <title>Title</title>
 </head>
 <body>
 ${msg}	<!-- HelloSpringMVC -->
->>>>>>> 15841d7d1bd9cc27c4c1cb96c165cd53aca6ae35
 </body>
 </html>
 ```
 
 
 
-<<<<<<< HEAD
-+ 在 web.xml 中注册 servlet（把 HelloServlet 映射到 /hello 页面，处理 /hello 的请求与响应）
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
-         version="4.0">
-
-    <servlet>
-        <servlet-name>hello</servlet-name>
-        <servlet-class>com.isaiah.servlet.HelloServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>hello</servlet-name>
-        <url-pattern>/hello</url-pattern>
-    </servlet-mapping>
-</web-app>
-=======
 # 3. 注解开发 SpringMVC
 
 ### 注意事项
@@ -460,19 +331,10 @@ ${msg}	<!-- HelloSpringMVC -->
     <servlet-name>myDispatcherServlet</servlet-name>
     <url-pattern>/</url-pattern>
 </servlet-mapping>
->>>>>>> 15841d7d1bd9cc27c4c1cb96c165cd53aca6ae35
 ```
 
 
 
-<<<<<<< HEAD
-# 3. 初识 SpringMVC
-
-+ 轻量级，简单易学
-+ 与 Spring 兼容性好，无缝结合
-+ 约定大于配置
-+ 功能强大
-=======
 ## 3.3 myDispatcherServlet-servlet.xml
 
 ```xml
@@ -783,4 +645,99 @@ public class EncodingFilter implements Filter {
     </filter-mapping>
 ```
 
->>>>>>> 15841d7d1bd9cc27c4c1cb96c165cd53aca6ae35
+
+
+# 8. Json
+
+**注意 1：**
+
+```xml
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.14.2</version>
+</dependency>
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <version>1.18.26</version>
+</dependency>
+```
+
+
+
+**注意 2：**
+
++ 作用在类上的 @RestController 和作用在方法上的 @ResponseBody 实现的功能是一样的
++ 都是将返回值直接显示在前端页面上，省去写测试页面的麻烦
+
+## 8.1 json 乱码问题
+
+```xml
+<mvc:annotation-driven>
+    <mvc:message-converters>
+        <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+            <constructor-arg value="UTF-8"/>
+        </bean>
+        <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+            <property name="objectMapper">
+                <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+                    <property name="failOnEmptyBeans" value="false"/>
+                </bean>
+            </property>
+        </bean>
+    </mvc:message-converters>
+</mvc:annotation-driven>
+```
+
+
+
+## 8.2 对象转换为 json 数据
+
+```java
+package utils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.text.SimpleDateFormat;
+
+public class JsonUtils {
+    public static String getJson(Object obj) {
+        return getJson(obj, "yyyy-MM-dd HH:mm:ss");
+    }
+
+    public static String getJson(Object obj, String dataFormat) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dataFormat);
+        objectMapper.setDateFormat(simpleDateFormat);
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+```
+
+```java
+package controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import pojo.User;
+import utils.JsonUtils;
+
+import java.util.Date;
+
+@RestController
+public class UserController {
+    @RequestMapping("/json")
+    public String test() {
+        User user = new User(1, "张三", 12);
+//        Date date = new Date();
+        return JsonUtils.getJson(user);	// {"id":1,"name":"张三","age":12}
+    }
+}
+```
