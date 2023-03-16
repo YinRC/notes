@@ -1416,6 +1416,20 @@ public class MyTest {
 
 ### 12.3.2 自定义来实现AOP（主要是切面定义）
 
+```java
+package com.isaiah.diy;
+
+public class DiyPointCut {
+    public void before() {
+        System.out.println("======方法执行前=========");
+    }
+
+    public void after() {
+        System.out.println("======方法执行后=========");
+    }
+}
+```
+
 ```xml
 <!--    注册bean-->
     <bean id="userService" class="com.isaiah.service.UserServiceImpl"/>
@@ -1538,8 +1552,490 @@ public class AnnotationPointCut {
 
 ## 13.2 回忆MyBatis
 
-1. 编写实体类
-2. 编写核心配置文件
-3. 编写接口
-4. 编写Mapper.xml
+### 13.2.1 mybatis 使用步骤
+
+1. 编写实体类 User
+2. 编写核心配置文件 mybatis-config.xml
+3. 编写接口 mapper/UserMapper.class 或 dao/UserDao.xml
+4. 编写Mapper.xml 放在 mapper 或 dao 文件夹下
+
+### 13.2.2 mybatis 实例
+
+注意：spring 连接数据库还需要 spring-jdbc
+
+==mybatis-config.xml==
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<!--configuration 核心配置文件-->
+<configuration>
+<!--    别名-->
+    <typeAliases>
+        <package name="com.isaiah.pojo"/>
+    </typeAliases>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis2?useSSL=true&amp;useUnicode=true&amp;characterEncoding=utf8"/>
+                <property name="username" value="root"/>
+                <property name="password" value="123456"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+<!--注册Mapper-->
+    <mappers>
+        <mapper class="com.isaiah.mapper.UserMapper"/>
+    </mappers>
+</configuration>
+```
+
+==User==（lombok）
+
+```java
+package com.isaiah.pojo;
+
+import lombok.Data;
+
+@Data
+public class User {
+    private int id;
+    private String name;
+    private String pwd;
+}
+```
+
+==UserMapper==
+
+```java
+package com.isaiah.mapper;
+
+import com.isaiah.pojo.User;
+
+import java.util.List;
+
+public interface UserMapper {
+    public List<User> selectUser();
+}
+```
+
+==UserMapper.xml==
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.isaiah.mapper.UserMapper">
+    <select id="selectUser" resultType="user">
+        select * from mybatis2.user
+    </select>
+</mapper>
+```
+
+
+
+### 13.2.3 mybatis 遗忘点
+
+#### 13.2.3.1 类型别名 typeAliases
+
+类型别名为实体类设置一个缩写名字，仅用于xml配置替代冗余的权限定名书写（mybatis-config.xml）
+
+```xml
+<typeAliases>
+	<typeAlias alias="author" type="com.isaiah.pojo.Author"/>
+</typeAliases>
+```
+
+也可以指定一个包名
+
+```xml
+<typeAliases>
+	<package name="com.isaiah.pojo"/>
+</typeAliases>
+```
+
+每一个在包中的 Java Bean 在每有 alias 注解的情况下，会使用 Bean 的首字母小写名称作为别名 com.isaiah.pojo.User -> user
+
+若有注解，则别名为其注解值
+
+```java
+@Alias("author111")
+public class Author {}
+```
+
+
+
+
+
+
+
+### 13.2.4 mybatis 踩坑
+
+在核心配置文件的基础上改动几处即可
+
+![image-20230228160837089](./spring.assets/image-20230228160837089.png)
+
+maven 静态资源固定问题（有的时候，maven并未把有些文件正确地放入target中，需要我们在pom中强调我们的需求）
+
+（include标签会帮助我们筛选directory标签中的内容）
+
+```xml
+<build>
+    <resources>
+        <resource>
+            <directory>src/main/java</directory>
+            <includes>
+                <include>**/*.xml</include>
+            </includes>
+        </resource>
+    </resources>
+</build>
+```
+
+1 字节的 UTF-8 序列的字节 1 无效
+
+（对于有中文注释的 xml 文件，需要把顶部的 `UTF-8` 替换为 `UTF8`，以下是在pom文件中批量地更改xml文件）
+
+```xml
+<properties>
+    <project.build.sourceEncoding>UTF8</project.build.sourceEncoding>
+</properties>
+```
+
+
+
+## 13.3 mybatis-spring
+
+### 13.3.1 项目结构
+
+
+
+![image-20230301114854379](./spring.assets/image-20230301114854379.png)
+
+![image-20230301115107813](./spring.assets/image-20230301115107813.png)
+
+### 13.3.2 注意事项
+
+
+
+一般把别名和设置放在 mybatis-config.xml 中，其它的部分（DataSource，sqlSessionFactory）交给 applicationContext.xml 处理
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<!--configuration 核心配置文件-->
+<configuration>
+<!--    别名-->
+    <typeAliases>
+        <package name="com.isaiah.pojo"/>
+    </typeAliases>
+<!--    <environments default="development">-->
+<!--        <environment id="development">-->
+<!--            <transactionManager type="JDBC"/>-->
+<!--            <dataSource type="POOLED">-->
+<!--                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>-->
+<!--                <property name="url" value="jdbc:mysql://localhost:3306/mybatis2?useSSL=true&amp;useUnicode=true&amp;characterEncoding=utf8"/>-->
+<!--                <property name="username" value="root"/>-->
+<!--                <property name="password" value="123456"/>-->
+<!--            </dataSource>-->
+<!--        </environment>-->
+<!--    </environments>-->
+<!--    <mappers>-->
+<!--        <mapper class="com.isaiah.mapper.UserMapper"/>-->
+<!--    </mappers>-->
+</configuration>
+```
+
+
+
+spring-jdbc 和 spring-webmvc 的版本应该一致
+
+![image-20230301115226722](./spring.assets/image-20230301115226722.png)
+
+### 13.3.3 使用步骤
+
++ 编写数据源配置（spring-dao.xml	I）
+
+```xml
+<!--    DataSource：用spring的数据源替换mybatis的配置
+        我们这里使用Spring提供的JDBC-->
+        <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+            <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="url" value="jdbc:mysql://localhost:3306/mybatis2?useSSL=true&amp;useUnicode=true&amp;characterEncoding=utf8"/>
+            <property name="username" value="root"/>
+            <property name="password" value="123456"/>
+        </bean>
+```
+
+
+
++ sqlSessionFactory（spring-dao.xml	II）
+
+```xml
+<!--    SQLSessionFactory 有set方法-->
+        <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+            <property name="dataSource" ref="dataSource"/>
+<!--        绑定mybatis配置文件-->
+            <property name="configLocation" value="classpath:mybatis-config.xml"/>
+            <property name="mapperLocations" value="classpath:com/isaiah/mapper/*.xml"/>
+        </bean>
+```
+
+
+
++ sqlSessionTemplate（spring-dao.xml	III）
+
+sqlSessionTemplate 是 mybatis-spring 的核心
+
+作为 SqlSession 的一个实现，它可以**无缝代替代码中已经使用的 SqlSession**
+
+```xml
+<!--    SqlSessionTemplate: 相当于sqlSession-->
+        <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+<!--        只能使用构造器注入，因为没有set方法-->
+            <constructor-arg index="0" ref="sqlSessionFactory"/>
+        </bean>
+```
+
+
+
++ 给接口加实现类（UserMapperImpl）
+
+```java
+package com.isaiah.mapper;
+
+import com.isaiah.pojo.User;
+import org.mybatis.spring.SqlSessionTemplate;
+
+import java.util.List;
+
+public class UserMapperImpl implements UserMapper {
+    /**
+     * 我们的所有操作都是用sqlSession执行，现在我们用sqlSessionTemplate
+     */
+    private SqlSessionTemplate sqlSessionTemplate;
+
+    public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+        this.sqlSessionTemplate = sqlSessionTemplate;
+    }
+
+    public List<User> selectUser() {
+        UserMapper mapper = sqlSessionTemplate.getMapper(UserMapper.class);
+        return mapper.selectUser();
+    }
+}
+
+```
+
+
+
++ 将实现类注入到Spring中（applicationContext.xml）
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="spring-dao.xml"/>
+
+    <bean id="userMapper" class="com.isaiah.mapper.UserMapperImpl">
+        <property name="sqlSessionTemplate" ref="sqlSessionTemplate"/>
+    </bean>
+</beans>
+```
+
+
+
++ 测试，验证功能
+
+```java
+import com.isaiah.mapper.UserMapper;
+import com.isaiah.pojo.User;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class MyTest {
+    @Test
+    public void test1() {
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        UserMapper userMapper = context.getBean("userMapper", UserMapper.class);
+        for (User user : userMapper.selectUser()) {
+            System.out.println(user);
+        }
+    }
+}
+```
+
+
+
+### 13.3.4 另一种方式（SqlSessionDaoSupport）
+
+sqlSessionDaoSupport 是一个抽象的支持类，用来提供 SqlSessionTemplate
+
+调用 getSqlSession() 方法就会得到一个 SqlSessionTemplate，之后可以用于执行 SQL 方法
+
+这样可以不用注入 SqlSessionFactory，因为在继承的抽象类里已经写好了
+
+也可以不用写 SqlSessionTemplate 的 set 方法，因为在继承的抽象类中已经赋值了
+
+注意：不要忘了配置 UserMapper 实现类
+
+![image-20230301125426202](./spring.assets/image-20230301125426202.png)
+
+![image-20230301125526827](./spring.assets/image-20230301125526827.png)
+
+
+
+------->
+
+
+
+![image-20230301123101703](./spring.assets/image-20230301123101703.png)
+
+![image-20230301125852500](./spring.assets/image-20230301125852500.png)
+
+因为继承的抽象类里面已经写好了为SqlSessionTemplate 注入 Factory 的 set 方法
+
+![image-20230301123635241](./spring.assets/image-20230301123635241.png)
+
+只需在实现类的 bean 中为继承的抽象类 SqlSessionDaoSupport 注入 SqlSessionFactory
+
+![image-20230301125708410](./spring.assets/image-20230301125708410.png)
+
+用 getSession 直接得到 SqlSessionTemplate
+
+![image-20230301124528944](./spring.assets/image-20230301124528944.png)
+
+
+
+# 14. 声明式事务
+
+## 14.1 回顾事务
+
+事务的 ACID 原则：
+
++ 原子性：确保要么都提交成功，要么都提交失败
++ 一致性：资源和状态保持一致
++ 隔离性：多个业务可能操作同一个资源，防止数据损坏
++ 持久性：事务一旦提交，无论系统发生什么问题，结果都不会被影响，被持久化地写到存储器中
+
+```java
+package com.isaiah.pojo;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class User {
+    private int id;
+    private String name;
+    private String pwd;
+}
+
+------------------------------------------------------------------------
+    
+package com.isaiah.mapper;
+
+import com.isaiah.pojo.User;
+import org.mybatis.spring.support.SqlSessionDaoSupport;
+
+import java.util.List;
+
+public class UserMapperImpl extends SqlSessionDaoSupport implements UserMapper {
+    public List<User> selectUser() {
+        User user = new User(8, "xiaohong", "123456");
+        UserMapper mapper = getSqlSession().getMapper(UserMapper.class);
+        // 成功添加一个用户
+        mapper.addUser(user);
+        // 故意写错 sql语句，删除特定用户失败
+        mapper.deleteUser(6);
+        // 筛选的结果显示添加用户的指令成功执行了
+        // 删除用户的指令执行失败了
+        // 我们希望两个指令绑定为一个事务：要么都成功，要么都失败
+        return mapper.selectUser();
+    }
+
+    public int addUser(User user) {
+        return getSqlSession().getMapper(UserMapper.class).addUser(user);
+    }
+
+    public int deleteUser(int id) {
+        return getSqlSession().getMapper(UserMapper.class).deleteUser(id);
+    }
+}
+```
+
+![image-20230302162609004](./spring.assets/image-20230302162609004.png)
+
+
+
+## 14.2 Spring 中的事务管理
+
++ 声明式事务：AOP（better）
++ 编程式事务：需要改变原有的代码
+
+为一个或若干个 UserMapper 中的方法配置事务，并把这种规定（事务，通知）赋能给指定的方法（切入点）
+
+```xml
+<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/mybatis2?useSSL=true&amp;useUnicode=true&amp;characterEncoding=utf8"/>
+        <property name="username" value="root"/>
+        <property name="password" value="123456"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="mybatis-config.xml"/>
+        <property name="mapperLocations" value="com/isaiah/mapper/*.xml"/>
+    </bean>
+
+<!--    配置声明式事务-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+<!--    结合AOP实现事务的织入-->
+<!--    配置事务通知-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+<!--        给那些方法配置事务-->
+<!--        配置事物的传播特性-->
+        <tx:attributes>
+            <tx:method name="select*"/>
+        </tx:attributes>
+    </tx:advice>
+<!--    配置事务切入-->
+    <aop:config>
+        <aop:pointcut id="txPointCut" expression="execution(* com.isaiah.mapper.UserMapper.select*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"/>
+    </aop:config>
+```
+
+业务一般都需要事务，一般是增删改
+
+```xml
+<tx:method name="add*" propagation="REQUIRED"/>
+<tx:method name="delete" propagation="REQUIRED"/>
+<tx:method name="update" propagation="REQUIRED"/>
+<tx:method name="query" read-only="true"/>
+<tx:method name="*"/>	默认是 propagation="REQUIRED"
+```
+
+
+
+
 

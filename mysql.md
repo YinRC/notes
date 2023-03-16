@@ -32,7 +32,7 @@ default-storage-engine=INNODB
 ```sql
 mysql -uroot -p123456 -- 连接数据库
 update mysql.user set authentication_string('123456') where user='root' and Host='localhost'; -- 修改用户密码
-alter user 'root'@'localhost' identified by '123456' -- 修改密码
+alter user 'root'@'localhost' identified by '123456' -- 修改密码 
 flush privileges -- 刷新权限
 
 -- 所有的语句都使用分号结尾
