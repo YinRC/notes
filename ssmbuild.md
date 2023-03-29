@@ -406,18 +406,471 @@ public class BooksServiceImpl implements BooksService {
 
 
 
-
-
 <img src="ssmbuild.assets/image-20230315224803156.png" alt="image-20230315224803156" style="zoom:67%;" />
 
 
 
+## 5.2 Spring 整合 service 层
+
+==resources.spring-service.xml==
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+<!--   1. 扫描service下的包-->
+    <context:component-scan base-package="com.isaiah.service"/>
+<!--    2. 将我们的所有业务类注入到Spring，可以通过配置或注解实现-->
+    <bean id="bookServiceImpl" class="com.isaiah.service.BooksServiceImpl">
+        <property name="booksMapper" ref="booksMapper"/>
+    </bean>
+<!--    3. 声明式事务配置-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+<!--        注入数据源-->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+<!--    4. aop事务支持-->
+</beans>
+```
 
 
-# 可能出现的问题
 
-## idea 没有及时建立文件之间的数据依赖
+==resources.applicationContext.xml== 注意：booksMapper 是别的配置文件中配置的内容，想要使用需要进行整合操作
+
+```xml
+<import resource="classpath:spring-dao.xml"/>
+<import resource="classpath:spring-service.xml"/>
+```
+
+
+
+# 6. SpringMVC 层内容
+
+## 6.1 dispatcherServlet && filter && session
+
+==web.WEB-INF.web.xml==
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+<!--    DispatcherServlet-->
+    <servlet>
+        <servlet-name>springmvc</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:applicationContext.xml</param-value>
+        </init-param>
+<!--        与tomcat一起启动-->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>springmvc</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+<!--    乱码过滤-->
+    <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+<!--    Session过期时间(分钟)-->
+    <session-config>
+        <session-timeout>15</session-timeout>
+    </session-config>
+</web-app>
+```
+
+![image-20230323202226199](ssmbuild.assets/image-20230323202226199.png)
+
+## 6.2 注解驱动 && 静态资源过滤 && 扫描controller && 视图解析器
+
+==resources.spring-mvc.xml==
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+<!--    1. 注解驱动-->
+    <mvc:annotation-driven/>
+<!--    2. 静态资源过滤-->
+    <mvc:default-servlet-handler/>
+<!--    3. 扫描包：controller-->
+    <context:component-scan base-package="com.isaiah.controller"/>
+<!--    4. 视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+</beans>
+```
+
+
+
+# 7. 查询书籍功能
+
+## 7.1 Controller
+
+==controller.BooksController==
+
+```java
+package com.isaiah.controller;
+
+import com.isaiah.pojo.Books;
+import com.isaiah.service.BooksService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/book")
+public class BooksController {
+    // controller 调用 service 层
+    @Autowired
+    @Qualifier("booksServiceImpl")
+    private BooksService booksService;
+
+    // 查询全部的书籍，并且返回到书籍展示页面
+    @RequestMapping("/allBooks")
+    public String list(Model model) {
+        List<Books> books = booksService.queryAllBook();
+        model.addAttribute("list", books);
+        return "allBooks";
+    }
+}
+```
+
+
+
+## 7.2 前端页面
+
+==index.jsp==
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+  <head>
+    <title>首页</title>
+    <style>
+      a {
+        text-decoration: none;
+        color: black;
+        font-size: 9rem;
+      }
+      div {
+        width: 80rem;
+        height: 10rem;
+        margin: 20rem auto;
+        text-align: center;
+        line-height: 10rem;
+        background: deepskyblue;
+        /*border-radius: 20px;*/
+      }
+    </style>
+  </head>
+  <body>
+  <div>
+    <a href="${pageContext.request.contextPath}/book/allBooks">进入库存书籍页面</a>
+  </div>
+  </body>
+</html>
+
+```
+
+
+
+==jsp.allBooks==
+
+```jsp
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>库存书籍</title>
+<%--    bootStrap 美化界面--%>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="page-header">
+                <h1>
+                    <small>书籍列表——显示所有的书籍</small>
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <table class="table table-hover table-striped">
+                <thread>
+                    <tr>
+                        <th>书籍编号</th>
+                        <th>书籍名称</th>
+                        <th>书籍数量</th>
+                        <th>书籍详情</th>
+                    </tr>
+                </thread>
+<%--                书籍从数据库中查询出来，从list遍历出来--%>
+                <tbody>
+                    <c:forEach var="book" items="${list}">
+                        <tr>
+                            <td>${book.bookID}</td>
+                            <td>${book.bookName}</td>
+                            <td>${book.bookCounts}</td>
+                            <td>${book.detail}</td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+```
+
+
+
+# 8. 添加书籍功能
+
+处理 `/book/toAddBook` 请求，跳转到 `/book/addBook` 页面
+
+处理 `/book/addBook` 请求，重定向到 `/book/allBooks` 页面
+
+```java
+// 跳转到增加书籍页面
+@RequestMapping("/toAddBook")
+public String toAddBook() {
+    return "addBook";
+}
+
+// 添加书籍的请求
+@RequestMapping("/addBook")
+public String addBooks(Books books) {
+    System.out.println("addBook=>" + books);
+    booksService.addBook(books);
+    return "redirect:/book/allBooks";
+}
+```
+
+
+
+allBooks.jsp 添加新増书籍按钮
+
+```jsp
+<div class="row">
+    <div class="col-md-4 column">
+        <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/toAddBook">新増书籍</a>
+    </div>
+</div>
+```
+
+
+
+==jsp.addBook== 提交到 `/book/addBook`
+
+表单为空，禁止提交 = required
+
+name 属性必须与数据库的属性，实体类的属性对应
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+    <%--    bootStrap 美化界面--%>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="page-header">
+                <h1>
+                    <small>新増书籍</small>
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <form action="${pageContext.request.contextPath}/book/addBook" method="post">
+        <div class="form-group">
+            <label for="bkname">书籍名称：</label>
+            <input type="text" name="bookName" class="form-control" id="bkname" required>
+        </div>
+        <div class="form-group">
+            <label for="bkcounts">书籍数量：</label>
+            <input type="text" name="bookCounts" class="form-control" id="bkcounts" required>
+        </div>
+        <div class="form-group">
+            <label for="bkdetail">书籍描述：</label>
+            <input type="text" name="detail" class="form-control" id="bkdetail" required>
+        </div>
+        <div class="form-group">
+            <input type="submit" class="form-control" value="添加">
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
+```
+
+
+
+结果：addBook=>Books(bookID=0, bookName=java-test, bookCounts=123, detail=good)
+
+
+
+# 9. 修改删除书籍功能
+
+处理 `/book/toUpdateBook` 请求，跳转到 `/book/updateBook` 页面
+
+```jsp
+<c:forEach var="book" items="${list}">
+    <tr>
+        <td>${book.bookID}</td>
+        <td>${book.bookName}</td>
+        <td>${book.bookCounts}</td>
+        <td>${book.detail}</td>
+        <td>
+            <a href="${pageContext.request.contextPath}/book/toUpdateBook?id=${book.bookID}">修改</a>
+            &nbsp; | &nbsp;
+            <a href="${pageContext.request.contextPath}/to">删除</a>
+        </td>
+    </tr>
+</c:forEach>
+```
+
+
+
+处理 `/book/updateBook` 请求，重定向到 `/book/allBooks` 页面
+
+点击==修改|删除==后，跳到的页面要有当前的信息，使用 model 传递 id2book 键值对
+
+```java
+// 跳转到修改页面
+@RequestMapping("/toUpdateBook")
+public String toUpdateBook(int id, Model model) {
+    Books book = booksService.queryBookById(id);
+    model.addAttribute("id2book", book);
+    return "updateBook";
+}
+
+// 修改书籍
+@RequestMapping("/updateBook")
+public String updateBook(Books book) {
+    System.out.println("updateBook=>" + book);
+    booksService.updateBook(book);
+    return "redirect:/book/allBooks";
+}
+```
+
+
+
+==jsp.updateBook==
+
+取出 id2book 键值对，预填写相关的信息
+
+逻辑上不能更改 bookId，所以没有列在页面上，但是前端需要传 bookID 给后端
+
+针对 bookID 完成 SQL 命令
+
+```xml
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>修改书籍</title>
+  <%--    bootStrap 美化界面--%>
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <div class="row clearfix">
+    <div class="col-md-12 column">
+      <div class="page-header">
+        <h1>
+          <small>修改书籍</small>
+        </h1>
+      </div>
+    </div>
+  </div>
+
+  <form action="${pageContext.request.contextPath}/book/updateBook" method="post">
+    <input type="hidden" name="bookID" value="${id2book.bookID}"/>
+    <div class="form-group">
+      <label for="bkname">书籍名称：</label>
+      <input type="text" name="bookName" class="form-control" id="bkname" value="${id2book.bookName}" required>
+    </div>
+    <div class="form-group">
+      <label for="bkcounts">书籍数量：</label>
+      <input type="text" name="bookCounts" class="form-control" id="bkcounts" value="${id2book.bookCounts}" required>
+    </div>
+    <div class="form-group">
+      <label for="bkdetail">书籍描述：</label>
+      <input type="text" name="detail" class="form-control" id="bkdetail" value="${id2book.detail}" required>
+    </div>
+    <div class="form-group">
+      <input type="submit" class="form-control" value="修改">
+    </div>
+  </form>
+</div>
+
+</body>
+</html>
+```
+
+
+
+# 10. 搜索功能
+
+
+
+# #. 可能出现的问题
+
+## #.1 idea 没有及时建立文件之间的数据依赖
 
 <img src="ssmbuild.assets/image-20230315230426524.png" alt="image-20230315230426524" style="zoom:67%;" />
 
 ![image-20230315230501477](ssmbuild.assets/image-20230315230501477.png)
+
+
+
+## #.2 一个或多个筛选器启动失败
+
+原因是 idea 在 Artifacts 中没有在 lib 文件夹下导入相应的包
+
+解决方法：手动导入依赖的包
