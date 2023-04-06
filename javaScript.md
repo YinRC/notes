@@ -1344,3 +1344,176 @@ $(window).height();
 $('ul li[name=python]').toggle();
 ```
 
+
+
+# 13 练习
+## 13.1 JavaScript 练习
+
+### 13.1.1 js 事件
+
+```html
+<button onclick="myFunction()">Click me.</button>
+<div onmouseover="this.style.backgroundColor='red'">myDIV.</div>
+```
+
+
+
+### 13.1.2 js 字符串
+
+```js
+alert("hello" + "world"); // hello world
+alert(str.length);	// str length
+toUpperCase() slice() replace()
+```
+
+
+
+### 13.1.3 js Dates
+
+```js
+const d = new Date();
+d.getFullYear();	// 2012
+d.getMonth();	// 12
+d.setFullYear(2022);	// 2022
+```
+
+
+
+### 13.1.4 js Math
+
+```js
+Math.random();	// 0~1
+Math.max(...array);
+Math.round();	// nearest
+Math.sqrt();
+```
+
+
+
+### 13.1.5 js loops
+
+```js
+for (x of fruits) {
+    console.log(x);
+}
+```
+
+
+
+### 13.1.6 js dom
+
+```js
+document.getElementById("demo").innerHTML = "hello";
+document.getElementByTagName("p")[0].innerHTML = "hello";
+document.getElementByClassName("test")[0].innerHTML = "hellO";
+
+document.getElementById("demo").style.color = "red";
+document.getElementById("demo").addEventListener("click", myFunction);
+```
+
+
+
+### 13.1.7 js 数组
+
+数组的长度也用 length 属性获得
+
+```js
+const fruits = ["Banana", "Orange", "Apple"];
+fruits.push("Kiwi");	// 放到最后的位置上
+fruits.pop();	// rm 最后的元素
+```
+
+const 数组可以改变元素的值，但是不能重新赋值新数组
+
+
+
+## 13.2 jQuery 练习
+
+### 13.2.1 选择器
+
+```js
+// 隐藏所有的 <p> 元素
+$("p").hide();
+// 隐藏 id="test" 的元素
+$("#test").hide();
+// 隐藏所有 class="test" 的元素
+$(".test").hide();
+// 隐藏文档中的所有元素
+$("*").hide();
+// 隐藏所有具有 href 属性的元素
+$("[href]").hide();
+// 隐藏表格中所有奇数行
+$("tr:odd").hide()
+
+parent()	// 直接父级元素
+parents()	// 所有的父级元素
+children()	// 所有的子元素
+find("span")	// 子元素中的所有 span 元素
+siblings()	//	所有兄弟元素
+first()	// 第一个元素
+```
+
++ tr: table row
++ td: table data
++ th: table header
+
+
+
+### 13.2.2 jquery 事件
+
+```js
+// 点击隐藏所有的 <p> 元素
+$("p").click(function(){$(this).hide();});
+// 双击隐藏 <p> 元素
+$("p").dblclick(function(){$(this).hide();});
+// 鼠标进入	mouseenter
+// 按下键盘 keypress
+// 使用 on 方法处理
+$("p").on("click", function(){$(this).hide();});
+// hide("slow")	 show()	 toggle()
+```
+
+
+
+### 13.2.3 jquery get/set
+
+```js
+$("div").text();	// div 元素的文本内容
+$("div").html();	// div 元素的 HTML 内容
+$("input").val();	// 返回 input 输入字段
+$("a").attr("href");	// 返回链接的 URL 地址
+
+$("img").attr("src", "myImage.jpg");
+```
+
+
+
+### 13.2.4 jquery add/remove
+
+```js
+$("p").append("YES!");	// 后插
+$("p").prepend("YES!");	// 前插
+
+$("div").remove();	// 删除 div
+$("div").empty();	// 删除 div 子元素
+$("div").remove(".test, .demo");	// 删除所有 class=test 且 class=demo 的 div
+
+$("p").click(function(){$(this).toggleClass("important");});	// 点击时，删除/添加 important 类
+```
+
+
+
+### 13.2.5 jquery css
+
+```js
+$("p").css("background-color", "pink");	// 将 p 元素的背景颜色调为粉色
+$("p").css("background-color");	// 返回 p 元素的背景颜色
+```
+
+
+
+### 13.2.6 jquery 尺寸
+
+```js
+$("p").height(500).width(500);	// p 元素的高度和宽度都设置为 500px
+```

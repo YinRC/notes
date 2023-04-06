@@ -518,7 +518,7 @@ public String test1(Model model) {
 }
 ```
 
-
+![image-20230404232356873](springMVC.assets/image-20230404232356873.png)
 
 # 6. 前后端的信息传递
 
@@ -741,3 +741,642 @@ public class UserController {
     }
 }
 ```
+
+
+
+# 9. ssm 整合（ssmbuild）
+
+[ssmbuild](./ssmbuild.md)
+
+
+
+# 10. Ajax
+
+AJAX = Asynchronous JavaScript and XML (异步的 JavaScript 和 XML)
+
+是一种不用重新加载整个页面就可以部分个更新网页的技术
+
+html 中的 iframe 可以实现类似的事情
+
+==web.test.html==
+
+```html
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>iframe 体验页面无刷新</title>
+</head>
+<body>
+    <script>
+        function go() {
+            document.getElementById("if1").src = document.getElementById("url").value;
+        }
+    </script>
+    <div>
+        <p>请输入地址：</p>
+        <p>
+            <label for="url">
+                <input type="text" id="url" value="https://www.bilibili.com/">
+            </label>
+            <input type="button" value="提交" onclick="go()">
+        </p>
+    </div>
+    <div>
+        <iframe id="if1" style="width: 100%;height: 500px;"></iframe>
+    </div>
+</body>
+</html>
+```
+
+![image-20230403205739101](springMVC.assets/image-20230403205739101.png)
+
+![image-20230403205809107](springMVC.assets/image-20230403205809107.png)
+
+## 10.1 状态码
+
+200：成功 ok
+
+300：重定向或转发
+
+400：客户端出问题
+
+500：服务端出问题
+
+
+
+## 10.2 $.ajax
+
+==$.each(collection, function(index, value){;})==
+
+```js
+// jQuery的each方法是一种遍历集合（如数组和对象）的通用方法
+// collection 是要遍历的集合，可以是数组、对象、类数组对象或jQuery对象
+// callback 是每个元素执行的回调函数，它接收两个参数：index表示当前元素的索引或键，value表示当前元素的值
+jQuery.each(collection, callback);
+
+// 遍历数组
+var arr = [1, 2, 3];
+jQuery.each(arr, function(index, value) {
+    console.log(index, value);
+});
+
+// 遍历对象
+var obj = { foo: 1, bar: 2, baz: 3 };
+jQuery.each(obj, function(key, value) {
+    console.log(key, value);
+});
+
+// each方法经常用于对DOM元素进行遍历和操作
+$('form button').each(function(index, element) {
+    $(element).on('click', function() {
+        alert('Button ' + (index + 1) + ' clicked!');
+    });
+});
+```
+
+==ajax 源码==
+
+```js
+// 使用jQuery的each方法循环遍历数组["get", "post"]，对于数组中的每个元素，执行传入的回调函数
+jQuery.each( [ "get", "post" ], function( _i, method ) {
+    // method 为 get 或 post
+	jQuery[ method ] = function( url, data, callback, type ) {
+
+		// Shift arguments if data argument was omitted
+		if ( isFunction( data ) ) {
+			type = type || callback;
+			callback = data;
+			data = undefined;
+		}
+
+		// The url can be an options object (which then must have .url)
+        // jQuery.extend 用于将两个或多个对象合并成一个对象
+		return jQuery.ajax( jQuery.extend( {
+			url: url,
+			type: method,
+			dataType: type,
+			data: data,
+			success: callback
+		}, jQuery.isPlainObject( url ) && url ) );
+	};
+} );
+```
+
+==ajax 原理==
+
+<img src="springMVC.assets/image-20230403152706053.png" alt="image-20230403152706053" style="zoom: 67%;" />
+
+==web.index.jsp==
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+  <head>
+    <title>$Title$</title>
+    <script src="${pageContext.request.contextPath}/static/js/jquery-3.6.4.js"></script>
+    <script>
+      $.ajax()
+      function a() {
+        $.post({
+          url:"${pageContext.request.contextPath}/a1",
+          data:{"name":$("#username").val()},
+          success:function(data, status) {
+            console.log("data=" + data);
+            console.log("status=" + status);
+          },
+          error:function() {
+            ;
+          }
+        })
+      }
+    </script>
+  </head>
+  <body>
+  username: <input type="text" id="username" onblur="a()">
+  </body>
+</html>
+```
+
+==controller.AjaxController==
+
+```java
+@RequestMapping("/a1")
+public void a1(String name, HttpServletResponse response) throws IOException {
+    System.out.println("a1:param=>" + name);
+    if ("isaiah".equals(name)) {
+        response.getWriter().print("true");
+    } else {
+        response.getWriter().print("false");
+    }
+}
+```
+
+![image-20230403205931370](springMVC.assets/image-20230403205931370.png)
+
+![image-20230403205949671](springMVC.assets/image-20230403205949671.png)
+
+![image-20230403210036624](springMVC.assets/image-20230403210036624.png)
+
+![image-20230403210100783](springMVC.assets/image-20230403210100783.png)
+
+
+
+## 10.3 ajax 获取响应的数据
+
+==pojo.User.java==
+
+```java
+package com.isaiah.pojo;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+    private String name;
+    private int age;
+    private String sex;
+}
+```
+
+==controller.AjaxController.java==
+
+```java
+@RequestMapping("/a2")
+public List<User> a2() {
+    List<User> userList = new ArrayList<>();
+    // 添加数据
+    userList.add(new User("isaiah", 12, "男"));
+    userList.add(new User("jacob", 11, "男"));
+    userList.add(new User("altman", 15, "女"));
+    return userList;
+}
+```
+
+==web.test2.jsp==
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+    <script src="${pageContext.request.contextPath}/static/js/jquery-3.6.4.js"></script>
+    <script>
+      $(function(){
+        $("#btn").click(function a(){
+          $.post("${pageContext.request.contextPath}/a2", function(data){
+            // console.log(data);
+              let html = "";
+              for (let i = 0; i < data.length; i++) {
+                  html+=`<tr>
+                            <td>`+data[i].name+`</td>
+                            <td>`+data[i].age+`</td>
+                            <td>`+data[i].sex+`</td>
+                        </tr>`
+              }
+              $("#content").html(html);
+          })
+        })
+      })
+    </script>
+</head>
+<body>
+<input type="button" value="加载数据" id="btn"/>
+<table>
+  <tr>
+    <td>姓名</td>
+    <td>年龄</td>
+    <td>性别</td>
+  </tr>
+  <tbody id="content">
+
+  </tbody>
+</table>
+
+</body>
+</html>
+```
+
+![image-20230403210138569](springMVC.assets/image-20230403210138569.png)
+
+![image-20230403195025597](springMVC.assets/image-20230403195025597.png)
+
+
+
+## 10.4 ajax 登录检测
+
+==controller.AjaxController.java==
+
+```java
+@RequestMapping("/a3")
+public String a3(String name, String pwd) {
+    String msg="";
+    if (name != null) {
+        if ("admin".equals(name)) {
+            msg = "ok";
+        } else {
+            msg = "用户名有误";
+        }
+    }
+    if (pwd != null) {
+        if ("123456".equals(pwd)) {
+            msg = "ok";
+        } else {
+            msg = "密码有误";
+        }
+    }
+    return msg;
+}
+```
+
+==applicationContext.xml==
+
+**需要处理 json 乱码**
+
+```xml
+<!--    json 乱码-->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+            </bean>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper">
+                    <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+                        <property name="failOnEmptyBeans" value="false"/>
+                    </bean>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+```
+
+==web.login.jsp==
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+    <script src="${pageContext.request.contextPath}/static/js/jquery-3.6.4.js"></script>
+    <script>
+        function a1() {
+            $.post({
+              url:"${pageContext.request.contextPath}/a3",
+              data:{"name":$("#name").val()},
+              success:function(data){
+                  if (data === 'ok') {
+                      $("#userinfo").css("color", "green").html(data);
+                  } else {
+                    $("#userinfo").css("color", "red").html(data);
+                  }
+              }
+            })
+        }
+        function a2() {
+            $.post({
+                url:"${pageContext.request.contextPath}/a3",
+                data:{"pwd":$("#pwd").val()},
+                success:function(data) {
+                  if (data === 'ok') {
+                      $("#pwdInfo").css("color", "green").html(data);
+                  } else {
+                      $("#pwdInfo").css("color", "red").html(data);
+                  }
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+    <p>
+        <label for="name"></label>
+        用户名：<input type="text" id="name" onblur="a1()">
+        <span id="userinfo"></span>
+    </p>
+    <p>
+        <label for="pwd"></label>
+        密码：<input type="text" id="pwd" onblur="a2()">
+        <span id="pwdInfo"></span>
+    </p>
+</body>
+</html>
+```
+
+
+
+![image-20230403205331493](springMVC.assets/image-20230403205331493.png)
+
+# 11. 拦截器
+
+## 11.1 拦截器初探
+
+**过滤器：**
+
++ 是 servlet 规范中的一部份，任何 java web 项目都可以使用
++ 在 url-pattern 中配置了 /* 之后，可以对所有要访问的资源进行拦截
+
+**拦截器：**
+
++ 是 SpringMVC 框架独有的，只有导入了此框架的依赖才可以使用
++ 拦截器只会拦截对控制器的访问，如果访问的是 jsp/html/css/js/image 都不会拦截
+
+==applicationContext.xml==
+
+```xml
+<!--    拦截器配置-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+<!--            /** 即 / 下面所有文件夹，所有请求-->
+            <mvc:mapping path="/**"/>
+            <bean class="com.isaiah.config.MyInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+```
+
+对比 filter 过滤器，interceptor 拦截器是用 **spring 的方法（AOP）**，filter 是用 **tomcat 容器的方法**
+
+==filter 对照==
+
+```xml
+<filter>
+    <filter-name>encoding</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+        <param-name>encoding</param-name>
+        <param-value>utf-8</param-value>
+    </init-param>
+</filter>
+<filter-mapping>
+    <filter-name>encoding</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+由于是使用 aop 的方法定义的，需要注入一个（实现了） interceptor 的对象
+
+==com.isaiah.config.MyInterceptor==
+
+```java
+package com.isaiah.config;
+
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class MyInterceptor implements HandlerInterceptor {
+    @Override	// return true 执行下一个拦截器放行，return false 不通过
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("=============处理前=============");
+        return true;
+    }
+
+    @Override	// 提供拦截日志
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("===================处理后================");
+    }
+
+    @Override	// 提供拦截日志
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("==========================清理=========================");
+    }
+}
+```
+
+用于测试的 controller 类
+
+==InterceptorController.java==
+
+```java
+package com.isaiah.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class InterceptorController {
+    @RequestMapping("/t1")
+    public String test() {
+        System.out.println("test() 执行");
+        return "OK";
+    }
+}
+```
+
+
+
+## 11.2 拦截器登录判断
+
+![image-20230404232638966](springMVC.assets/image-20230404232638966.png)
+
+**WEB-INF：**
+
++ **下面的所有页面或资源**，只能通过 **controller 或 servlet** 进行访问，也即**只能通过后端访问**
+
++ 由于只能通过后端访问，所以**只能使用转发**访问里面的页面，**重定向会导致 404 错误**
+
+==error==
+
+```html
+javax.servlet.ServletException: Servlet[springmvc]的Servlet.init（）引发异常
+```
+
+原因是无法为 dispatcherServlet 初始化：即 applicationContext.xml 中有错误，含有不能被初始化的 bean
+
+
+
+==index.jsp==
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+  <head>
+    <title>$Title$</title>
+  </head>
+  <body>
+  <h1><a href="${pageContext.request.contextPath}/user/goLogin">登录页面</a></h1>
+  <h1><a href="${pageContext.request.contextPath}/user/main">首页</a></h1>
+
+  </body>
+</html>
+```
+
+==login.jsp==	登录页
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+<h1>登录页面</h1>
+<form action="${pageContext.request.contextPath}/user/login" method="post">
+    用户名：<input type="text" name="username">
+    密  码：<input type="text" name="password">
+    <input type="submit" value="提交">
+</form>
+
+</body>
+</html>
+```
+
+==main.jsp==	首页
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>title</title>
+</head>
+<body>
+    <h1>首页</h1>
+<span>${username}</span>
+<p>
+    <a href="${pageContext.request.contextPath}/user/logout">注销</a>
+</p>
+</body>
+</html>
+```
+
+==controller.LoginController==
+
+```java
+package com.isaiah.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.http.HttpSession;
+
+@Controller
+@RequestMapping("/user")
+public class LoginController {
+    @RequestMapping("/goLogin")
+    public String goLogin() {
+    return "login";
+}
+
+    @RequestMapping("/login")
+    public String login(HttpSession session, String username, String password, Model model) {
+        System.out.println("login=>" + username);
+        // 把用户信息存在 session 中
+        session.setAttribute("userLoginInfo", username);
+        model.addAttribute("username", username);
+        return "main";
+    }
+
+    @RequestMapping("/main")
+    public String Main() {
+        return "main";
+    }
+
+    @RequestMapping("/logout")
+    public String logOut(HttpSession session) {
+        session.setAttribute("userLoginInfo", null);
+        System.out.println("logout=>" + session.getAttribute("userLoginInfo"));
+        return "main";
+    }
+
+}
+```
+
+==config.LoginInterceptor==
+
+```java
+package com.isaiah.config;
+
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+public class LoginInterceptor implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 如果是访问登录页或填写信息后提交登录请求，都予以放行
+        if (request.getRequestURI().contains("goLogin")) {
+            return true;
+        }
+
+        if (request.getRequestURI().contains("login")) {
+            return true;
+        }
+
+        // session 中获取到登录信息就予以放行
+        if (request.getSession().getAttribute("userLoginInfo") != null && request.getSession().getAttribute("userLoginInfo") != "") {
+            return true;
+        }
+
+        // 如果有违规的地方，就转发到登录页
+        request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request, response);
+        return false;
+    }
+}
+```
+
+==applicationContext.xml==	注册拦截器
+
+```xml
+<mvc:interceptor>
+    <mvc:mapping path="/user/**"/>
+    <bean class="com.isaiah.config.LoginInterceptor"/>
+</mvc:interceptor>
+```
+
+**session 注销的方法：**
+
+```java
+session.invalidate();	// 销毁全部 session
+session.removeAttribute("userLoginInfo");	// 销毁指定的 session
+session.setAttribute("userLoginInfo", null);	// 销毁指定的 session
+```
+
+ 需要注销两次，才能够跳回登录页......

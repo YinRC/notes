@@ -616,23 +616,28 @@ public class BooksController {
 <head>
     <title>库存书籍</title>
 <%--    bootStrap 美化界面--%>
-    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.css" rel="stylesheet">
 
 </head>
 <body>
 <div class="container">
-    <div class="row clearfix">
-        <div class="col-md-12 column">
+    <div class="row">
+        <!-- 标题 -->
+        <div class="col-md-12">
             <div class="page-header">
                 <h1>
                     <small>书籍列表——显示所有的书籍</small>
                 </h1>
             </div>
         </div>
-    </div>
-
-    <div class="row clearfix">
-        <div class="col-md-12 column">
+        
+        <!-- 新増书籍按钮 -->
+        <div class="col-md-9">
+            <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/toAddBook">新増书籍</a>
+        </div>
+        
+        <!-- 列表标题，列表内容，jstl取出内容 -->
+        <div class="col-md-12">
             <table class="table table-hover table-striped">
                 <thread>
                     <tr>
@@ -642,16 +647,16 @@ public class BooksController {
                         <th>书籍详情</th>
                     </tr>
                 </thread>
-<%--                书籍从数据库中查询出来，从list遍历出来--%>
+                <%--                书籍从数据库中查询出来，从list遍历出来--%>
                 <tbody>
-                    <c:forEach var="book" items="${list}">
-                        <tr>
-                            <td>${book.bookID}</td>
-                            <td>${book.bookName}</td>
-                            <td>${book.bookCounts}</td>
-                            <td>${book.detail}</td>
-                        </tr>
-                    </c:forEach>
+                <c:forEach var="book" items="${list}">
+                    <tr>
+                        <td>${book.bookID}</td>
+                        <td>${book.bookName}</td>
+                        <td>${book.bookCounts}</td>
+                        <td>${book.detail}</td>
+                    </tr>
+                </c:forEach>
                 </tbody>
             </table>
         </div>
@@ -686,13 +691,13 @@ public String addBooks(Books books) {
 }
 ```
 
-
+![image-20230404232504181](ssmbuild.assets/image-20230404232504181.png)、
 
 allBooks.jsp 添加新増书籍按钮
 
 ```jsp
 <div class="row">
-    <div class="col-md-4 column">
+    <div class="col-md-4">
         <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/toAddBook">新増书籍</a>
     </div>
 </div>
@@ -712,37 +717,37 @@ name 属性必须与数据库的属性，实体类的属性对应
 <head>
     <title>Title</title>
     <%--    bootStrap 美化界面--%>
-    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
-    <div class="row clearfix">
-        <div class="col-md-12 column">
+    <div class="row">
+        <div class="col-md-12">
             <div class="page-header">
                 <h1>
                     <small>新増书籍</small>
                 </h1>
             </div>
         </div>
-    </div>
 
-    <form action="${pageContext.request.contextPath}/book/addBook" method="post">
-        <div class="form-group">
-            <label for="bkname">书籍名称：</label>
-            <input type="text" name="bookName" class="form-control" id="bkname" required>
-        </div>
-        <div class="form-group">
-            <label for="bkcounts">书籍数量：</label>
-            <input type="text" name="bookCounts" class="form-control" id="bkcounts" required>
-        </div>
-        <div class="form-group">
-            <label for="bkdetail">书籍描述：</label>
-            <input type="text" name="detail" class="form-control" id="bkdetail" required>
-        </div>
-        <div class="form-group">
-            <input type="submit" class="form-control" value="添加">
-        </div>
-    </form>
+        <form action="${pageContext.request.contextPath}/book/addBook" method="post" class="col-md-12">
+            <div class="form-group">
+                <label for="bkname">书籍名称：</label>
+                <input type="text" name="bookName" class="form-control" id="bkname" required>
+            </div>
+            <div class="form-group">
+                <label for="bkcounts">书籍数量：</label>
+                <input type="text" name="bookCounts" class="form-control" id="bkcounts" required>
+            </div>
+            <div class="form-group">
+                <label for="bkdetail">书籍描述：</label>
+                <input type="text" name="detail" class="form-control" id="bkdetail" required>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="btn btn-primary col-md-12" value="添加">
+            </div>
+        </form>
+    </div>
 </div>
 
 </body>
@@ -755,9 +760,9 @@ name 属性必须与数据库的属性，实体类的属性对应
 
 
 
-# 9. 修改删除书籍功能
+# 9. 修改/删除书籍功能
 
-处理 `/book/toUpdateBook` 请求，跳转到 `/book/updateBook` 页面
+处理 `/book/toUpdateBook` 请求，跳转到 `/book/updateBook` 页面（普通风格，RestFul风格）
 
 ```jsp
 <c:forEach var="book" items="${list}">
@@ -769,7 +774,7 @@ name 属性必须与数据库的属性，实体类的属性对应
         <td>
             <a href="${pageContext.request.contextPath}/book/toUpdateBook?id=${book.bookID}">修改</a>
             &nbsp; | &nbsp;
-            <a href="${pageContext.request.contextPath}/to">删除</a>
+            <a href="${pageContext.request.contextPath}/book/deleteBook/${book.bookID}">删除</a>
         </td>
     </tr>
 </c:forEach>
@@ -797,11 +802,22 @@ public String updateBook(Books book) {
     booksService.updateBook(book);
     return "redirect:/book/allBooks";
 }
+
+// 删除书籍（RestFul风格）
+@RequestMapping("/deleteBook/{bookID}")
+public String deleteBook(@PathVariable("bookID") int id) {
+    booksService.deleteBookById(id);
+    return "redirect:/book/allBooks";
+}
 ```
+
+![image-20230404232442894](ssmbuild.assets/image-20230404232442894.png)
 
 
 
 ==jsp.updateBook==
+
+提供修改页面 `/book/toUpdateBook?id=#`
 
 取出 id2book 键值对，预填写相关的信息
 
@@ -815,38 +831,38 @@ public String updateBook(Books book) {
 <head>
     <title>修改书籍</title>
   <%--    bootStrap 美化界面--%>
-  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
-  <div class="row clearfix">
-    <div class="col-md-12 column">
+  <div class="row">
+    <div class="col-md-12">
       <div class="page-header">
         <h1>
           <small>修改书籍</small>
         </h1>
       </div>
     </div>
-  </div>
 
-  <form action="${pageContext.request.contextPath}/book/updateBook" method="post">
-    <input type="hidden" name="bookID" value="${id2book.bookID}"/>
-    <div class="form-group">
-      <label for="bkname">书籍名称：</label>
-      <input type="text" name="bookName" class="form-control" id="bkname" value="${id2book.bookName}" required>
-    </div>
-    <div class="form-group">
-      <label for="bkcounts">书籍数量：</label>
-      <input type="text" name="bookCounts" class="form-control" id="bkcounts" value="${id2book.bookCounts}" required>
-    </div>
-    <div class="form-group">
-      <label for="bkdetail">书籍描述：</label>
-      <input type="text" name="detail" class="form-control" id="bkdetail" value="${id2book.detail}" required>
-    </div>
-    <div class="form-group">
-      <input type="submit" class="form-control" value="修改">
-    </div>
-  </form>
+    <form action="${pageContext.request.contextPath}/book/updateBook" method="post" class="col-md-12">
+      <input type="hidden" name="bookID" value="${id2book.bookID}"/>
+      <div class="form-group">
+        <label for="bkname">书籍名称：</label>
+        <input type="text" name="bookName" class="form-control" id="bkname" value="${id2book.bookName}" required>
+      </div>
+      <div class="form-group">
+        <label for="bkcounts">书籍数量：</label>
+        <input type="text" name="bookCounts" class="form-control" id="bkcounts" value="${id2book.bookCounts}" required>
+      </div>
+      <div class="form-group">
+        <label for="bkdetail">书籍描述：</label>
+        <input type="text" name="detail" class="form-control" id="bkdetail" value="${id2book.detail}" required>
+      </div>
+      <div class="form-group">
+        <input type="submit" class="btn btn-primary col-md-12" value="修改">
+      </div>
+    </form>
+  </div>
 </div>
 
 </body>
@@ -857,11 +873,68 @@ public String updateBook(Books book) {
 
 # 10. 搜索功能
 
+==dao.BooksMapper==
+
+```java
+// 通过书名查询书籍
+List<Books> queryBooksByName(@Param("bookName") String bookName);
+```
+
+==dao.BooksMapper.xml==
+
+如果查询的字符串为空或null就返回空列表
+
+```xml
+<select id="queryBooksByName" resultType="Books">
+    select * from ssmbuild.books
+    where bookName like concat('%', #{bookName}, '%')
+    <if test="bookName == null or bookName == ''"> and false </if>
+</select>
+```
+
+==service.BooksService==
+
+```java
+// 通过书名查询书籍
+List<Books> queryBooksByName(String bookName);
+```
+
+==service.BooksServiceImpl==
+
+```java
+@Override
+public List<Books> queryBooksByName(String bookName) {
+    return booksMapper.queryBooksByName(bookName);
+}
+```
+
+==controller.BooksController==
+
+如果sql的结果是空列表（也就是查询失败），就打印出所有的库存书籍，同时提示没查到书籍
+
+如果sql的结果不是空列表，就列出查询的结果
+
+```java
+ // 查询书籍
+@RequestMapping("/queryBook")
+public String queryBook(String queryBookName, Model model) {
+    List<Books> books = booksService.queryBooksByName(queryBookName);
+    System.err.println("books=> " + books);
+    if (books.isEmpty()) {
+        model.addAttribute("list", booksService.queryAllBook());
+        model.addAttribute("error", "抱歉！没查到");
+    } else {
+        model.addAttribute("list", books);
+    }
+    return "allBooks";
+}
+```
 
 
-# #. 可能出现的问题
 
-## #.1 idea 没有及时建立文件之间的数据依赖
+# 11. 可能出现的问题
+
+## 11.1 idea 没有及时建立文件之间的数据依赖
 
 <img src="ssmbuild.assets/image-20230315230426524.png" alt="image-20230315230426524" style="zoom:67%;" />
 
@@ -869,8 +942,56 @@ public String updateBook(Books book) {
 
 
 
-## #.2 一个或多个筛选器启动失败
+## 11.2 一个或多个筛选器启动失败
 
 原因是 idea 在 Artifacts 中没有在 lib 文件夹下导入相应的包
 
 解决方法：手动导入依赖的包
+
+
+
+##  11.3 sql 查询显示参数为null
+
+要注意mapper的参数名是否对应
+
+要注意前端传值的name与controller接收值的参数名是否对应
+
+
+
+## 11.4 jsp 中使用 if...else
+
+To simulate **if** , you can use:
+
+```jsp
+<c:if test="condition"></c:if>
+```
+
+To simulate **if...else**, you can use:
+
+```jsp
+<c:choose>
+    <c:when test="${param.enter=='1'}">
+        pizza. 
+        <br />
+    </c:when>    
+    <c:otherwise>
+        pizzas. 
+        <br />
+    </c:otherwise>
+</c:choose>
+```
+
+动态选择 placeholder 的值：
+
+```jsp
+<input type="text" name="queryBookName" class="form-control" placeholder=
+            <c:choose>
+                <c:when test="${error != null}">
+                    "${error}"
+                </c:when>
+                <c:otherwise>
+                    "请输入要查询的书籍名称"
+                </c:otherwise>
+            </c:choose>
+/>
+```
