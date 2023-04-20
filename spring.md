@@ -710,7 +710,7 @@ byType: 会在容器的上下文中查找，bean class 和自己属性类型相�
 expected single matching bean but found 2: cat11,cat22
 ```
 
-**注意：**
+**注意：** （属性 == 字段）
 
 + 有属性类型重复的情况只能用 byName
 + set 方法的命名
@@ -896,7 +896,7 @@ public class User {
     @Value("Sam")
     public String name = "isaiah";
 
-    // 等价于 <property name="name" value="Sam"/>
+    // 等价于 <property name="name" value="Tom"/>
     @Value("Tom")
     public void setName(String name) {
         this.name = name;
@@ -956,9 +956,35 @@ public void test1() {
 
 # 10. 使用Java的方式配置Spring	@Configuration
 
-现在完全不使用xml 去配置Spring 了，配置的事情全部交给Java 来做
+现在完全不使用xml 去配置Spring 了，配置的事情全部交给Java 来做**（使用@Configuration替代@Component）**
 
 JavaConfig 是Spring 的一个子项目，在Spring 4 之后，它成为了核心功能
+
+**关于自动装配（隐式）**
+
++ 当Spring容器扫描@Configuration类时，
++ 会将其中的@Bean方法所返回的Bean实例注册到Spring容器中，
++ 这些Bean实例可以被其他的Bean自动装配
+
+```java
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public UserDao userDao() {
+        return new UserDaoImpl();
+    }
+
+    @Bean
+    public UserService userService() {
+        return new UserServiceImpl(userDao());
+    }
+}
+```
+
++ AppConfig声明了一个UserDao类型的Bean实例和一个UserService类型的Bean实例。
++ 在userService()方法中，使用了userDao()方法返回的UserDao实例，
++ 这个UserDao实例会被自动装配到userService()方法中
 
 ==实体类==
 
@@ -1008,7 +1034,7 @@ public class MyConfig {
     // bean 标签中的id 属性值，就等于这个方法的名字
     // bean 标签中的class 属性值，就等于这个方法的返回值
     @Bean
-    public User getUser() {
+    public User user() {
         // 要返回注入到 bean 的对象
         return new User();
     }
@@ -1030,7 +1056,7 @@ public class MyTest {
         // 如果完全使用配置类的方法，就需要通过 AnnotationConfig 上下文来获取容器
         // 通过配置类的 class 对象进行加载
         ApplicationContext context = new AnnotationConfigApplicationContext(MyConfig.class);
-        User getUser = context.getBean("getUser", User.class);
+        User getUser = context.getBean("user", User.class);
         System.out.println(getUser.getName());
     }
 }
@@ -1048,16 +1074,16 @@ public class MyTest {
 
 ### 11.1.1 静态代理组成部分
 
-+ **抽象角色：**一般会使用接口或抽象类来解决
-+ **真实角色：**被代理的角色
-+ **代理角色：**代理真实角色，代理之后一般会做一些附属操作
-+ **客户：**访问代理对象的人
++ **抽象角色 Rent：** 一般会使用接口或抽象类来解决
++ **真实角色 Host： ** 被代理的角色
++ **代理角色 Proxy：** 代理真实角色，代理之后一般会做一些附属操作
++ **客户 Client：** 访问代理对象的人
 
 
 
 ### 11.1.2 代码步骤
 
-**接口**
+**Rent 抽象角色（接口）**
 
 ```java
 package com.isaiah.demo1;
@@ -1067,7 +1093,7 @@ public interface Rent {
 }
 ```
 
-**真实角色**
+**Host 真实角色**
 
 ```java
 package com.isaiah.demo1;
@@ -1079,7 +1105,7 @@ public class Host implements Rent {
 }
 ```
 
-**代理角色**
+**Proxy 代理角色**
 
 ```java
 package com.isaiah.demo1;
@@ -1115,7 +1141,7 @@ public class Proxy implements Rent {
 }
 ```
 
-**客户端访问代理角色**
+**Client 客户端访问代理角色**
 
 ```java
 package com.isaiah.demo1;
@@ -1138,9 +1164,9 @@ public class Client {
 
 ### 11.2.3 代理模式的好处
 
-+ 可以使真实角色的操作更加纯粹，不用去关注一些公共的业务
-+ 公共业务交给了代理角色，实现了业务的分工
-+ 公共业务扩展的时候，方便集中管理
++ 可以**使真实角色的操作更加纯粹**，不用去关注一些公共的业务
++ **公共业务交给了代理角色**，实现了业务的分工
++ 公共业务扩展的时候，**方便集中管理**
 
 ### 11.2.4 代理模式的缺点
 
@@ -1153,11 +1179,21 @@ public class Client {
 ### 11.2.1 动态代理的实现
 
 + 动态代理和静态代理做的事情是一样的
-+ 动态代理的代理类是动态生成的，不是我们直接写好的
++ 动态代理的**代理类是运行时使用反射动态生成的**，不是我们直接写好的
 + 动态代理分为两大类：
-  + 基于接口的动态代理：jdk 的动态代理
-  + 基于类的动态代理：cglib 的动态代理
-  + java 字节码实现：Javassist
+  + **基于接口**的动态代理：jdk 的动态代理
+  + **基于类**的动态代理：cglib 的动态代理
++ 步骤：
+  + InnovationHandler
+    + 定义一个实现 InnovationHandler 接口的代理处理器类
+    + 这个类需要实现 invoke() 方法，
+    + 它是代理类调用目标方法时会被调用的方法，可以加入增强处理逻辑
+
+  + Proxy
+    + 类加载器用于加载代理类，
+    + 接口数组用于指定代理类实现的接口，
+    + 代理处理器对象用于实现对目标方法的增强处理逻辑
+
 
 需要了解两个类：
 
@@ -1204,6 +1240,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
     }
 
     // 处理代理类，并返回结果
+    @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         seeHouse();
         // 动态代理的本质，就是使用反射机制实现!
@@ -1238,15 +1275,173 @@ public class Client {
         // 动态生成的代理类
         Rent proxy = (Rent) pih.getProxy();
         proxy.rent();
-
     }
 }
 
 ```
 
+**from chat-gpt 1 interface 1 class**
+
+```java
+// 一个服务
+public interface UserService {
+    void save();
+}
+
+// 服务的实现
+public class UserServiceImpl implements UserService {
+    public void save() {
+        System.out.println("User saved.");
+    }
+}
+
+// 动态代理处理器
+public class LoggingInvocationHandler implements InvocationHandler {
+    private Object target;
+
+    public LoggingInvocationHandler(Object target) {
+        this.target = target;
+    }
+
+    public Object invoke(Object proxy, Method method, Object[] args)
+            throws Throwable {
+        System.out.println("Before method " + method.getName());
+        Object result = method.invoke(target, args);
+        System.out.println("After method " + method.getName());
+        return result;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // 一个服务的实现
+        UserService userService = new UserServiceImpl();
+        // new 服务处理器，指定某个服务的实现类
+        InvocationHandler handler = new LoggingInvocationHandler(userService);
+        // new 服务处理器代理
+        UserService proxy = (UserService) Proxy.newProxyInstance(
+                userService.getClass().getClassLoader(),
+                new Class[] { UserService.class },
+                handler);
+        // 一个增强的方法
+        proxy.save();
+    }
+}
+```
+
+**from chat-gpt 2 interfaces 1 class**
+
+```java
+public interface UserService {
+    void save();
+}
+
+public interface ProductService {
+    void addProduct();
+}
+
+// 实现类实现了两个接口
+public class MyService implements UserService, ProductService {
+    public void save() {
+        System.out.println("User saved.");
+    }
+
+    public void addProduct() {
+        System.out.println("Product added.");
+    }
+}
+
+public class LoggingInvocationHandler implements InvocationHandler {
+    private Object target;
+
+    public LoggingInvocationHandler(Object target) {
+        this.target = target;
+    }
+
+    public Object invoke(Object proxy, Method method, Object[] args)
+            throws Throwable {
+        System.out.println("Before method " + method.getName());
+        Object result = method.invoke(target, args);
+        System.out.println("After method " + method.getName());
+        return result;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        MyService myService = new MyService();
+        InvocationHandler handler = new LoggingInvocationHandler(myService);
+        Object proxy = Proxy.newProxyInstance(
+                myService.getClass().getClassLoader(),
+                new Class[] { UserService.class, ProductService.class },
+                handler);
+        UserService userService = (UserService)proxy;
+        ProductService productService = (ProductService)proxy;
+        userService.save();
+        productService.addProduct();
+    }
+}
+```
+
+**from chat-gpt 1 interfaces 2 class**
+
+```java
+public interface MyInterface {
+    void doSomething();
+}
+
+public class MyClassA implements MyInterface {
+    public void doSomething() {
+        System.out.println("MyClassA doSomething()");
+    }
+}
+
+public class MyClassB implements MyInterface {
+    public void doSomething() {
+        System.out.println("MyClassB doSomething()");
+    }
+}
+
+public class LoggingInvocationHandler implements InvocationHandler {
+    private List<Object> targets;
+
+    public LoggingInvocationHandler(List<Object> targets) {
+        this.targets = targets;
+    }
+
+    public Object invoke(Object proxy, Method method, Object[] args)
+            throws Throwable {
+        System.out.println("Before method " + method.getName());
+        for (Object target : targets) {
+            method.invoke(target, args);
+        }
+        System.out.println("After method " + method.getName());
+        return null;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        MyClassA myClassA = new MyClassA();
+        MyClassB myClassB = new MyClassB();
+        List<Object> targets = new ArrayList<>();
+        targets.add(myClassA);
+        targets.add(myClassB);
+        InvocationHandler handler = new LoggingInvocationHandler(targets);
+        MyInterface proxy = (MyInterface) Proxy.newProxyInstance(
+                Main.class.getClassLoader(),
+                new Class[] { MyInterface.class },
+                handler);
+        proxy.doSomething();
+    }
+}
+```
+
+
+
 ### 11.2.2 动态代理的好处
 
-+ 一个动态代理类代理的是一个接口，一般就是对应一类业务
++ 一个动态代理类**代理的是一个接口，一般就是对应一类业务**
 + 同上，一个动态代理类可以代理多个类，只要是实现了同一个接口即可
 
 
@@ -1255,25 +1450,25 @@ public class Client {
 
 ## 12.1 什么是AOP
 
-AOP（Aspect Oriented Programming）意为：面向切面编程
+AOP（Aspect Oriented Programming）意为：**面向切面编程**
 
-通过预编译方式和运行期动态代理，实现程序公共能的统一维护
+通过**预编译**方式和运行期**动态代理**，实现程序公共能的统一维护
 
 AOP 是 OOP 的延续，是软件开发中的一个热点，是函数式变成的一种衍生泛型
 
-利用 AOP 可以对业务逻辑中的各个部分进行隔离，从而使业务逻辑的各个部分之间的耦合度降低
+利用 AOP 可以**对业务逻辑中的各个部分进行隔离**，从而使业务逻辑的各个部分之间的耦合度降低
 
 ## 12.2 Spring在AOP中的作用
 
-提供声明式事务；允许用户自定义切面
+提供**声明式事务**；允许用户自定义切面
 
 + 横切关注点：跨越应用程序多个模块的方法和功能（日志，安全，缓存，，）
-+ 切面（Aspect）：横切关注点别模块化的特殊对象，是一个类
-+ 通知（Advice）：切面必须要完成的工作，是一个类中的方法
-+ 目标（Target）：被通知的对象
-+ 代理（Proxy）：向目标对象应用通知之后创建的对象
-+ 切入点（PointCut）：切面通知执行的”地点“的定义
-+ 连接点（JointPoint）：与切入点匹配的执行点
++ 切面（Aspect）：横切关注点模块化的特殊对象，是一个**类**
++ 通知（Advice）：切面必须要完成的工作，是一个类中的**方法**
++ 目标（Target）：被通知的**对象**
++ 代理（Proxy）：向目标对象**应用通知之后创建的对象**
++ 切入点（PointCut）：切面通知执行的**”地点“**的定义
++ 连接点（JointPoint）：**与切入点匹配的执行点**
 
 ## 12.3 使用Spring实现AOP
 
@@ -1648,7 +1843,7 @@ public interface UserMapper {
 
 #### 13.2.3.1 类型别名 typeAliases
 
-类型别名为实体类设置一个缩写名字，仅用于xml配置替代冗余的权限定名书写（mybatis-config.xml）
+类型别名为实体类设置一个缩写名字，仅用于xml配置**替代冗余的全限定名书写**（mybatis-config.xml）
 
 ```xml
 <typeAliases>
@@ -1656,7 +1851,7 @@ public interface UserMapper {
 </typeAliases>
 ```
 
-也可以指定一个包名
+也可以**指定一个包名**
 
 ```xml
 <typeAliases>
@@ -1677,8 +1872,6 @@ public class Author {}
 
 
 
-
-
 ### 13.2.4 mybatis 踩坑
 
 在核心配置文件的基础上改动几处即可
@@ -1687,7 +1880,7 @@ public class Author {}
 
 maven 静态资源固定问题（有的时候，maven并未把有些文件正确地放入target中，需要我们在pom中强调我们的需求）
 
-（include标签会帮助我们筛选directory标签中的内容）
+将 src/main/java 下任何目录下的xml文件包含进来
 
 ```xml
 <build>
@@ -1726,9 +1919,7 @@ maven 静态资源固定问题（有的时候，maven并未把有些文件正确
 
 ### 13.3.2 注意事项
 
-
-
-一般把别名和设置放在 mybatis-config.xml 中，其它的部分（DataSource，sqlSessionFactory）交给 applicationContext.xml 处理
+一般把**别名和设置放在 mybatis-config.xml 中**，其它的部分（**DataSource**，**sqlSessionFactory**）交给 applicationContext.xml 处理
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -1758,8 +1949,6 @@ maven 静态资源固定问题（有的时候，maven并未把有些文件正确
 </configuration>
 ```
 
-
-
 spring-jdbc 和 spring-webmvc 的版本应该一致
 
 ![image-20230301115226722](./spring.assets/image-20230301115226722.png)
@@ -1779,8 +1968,6 @@ spring-jdbc 和 spring-webmvc 的版本应该一致
         </bean>
 ```
 
-
-
 + sqlSessionFactory（spring-dao.xml	II）
 
 ```xml
@@ -1793,13 +1980,10 @@ spring-jdbc 和 spring-webmvc 的版本应该一致
         </bean>
 ```
 
-
-
 + sqlSessionTemplate（spring-dao.xml	III）
+    + **sqlSessionTemplate** 是 mybatis-spring 的核心
+    + 作为 SqlSession 的一个实现，它可以**无缝代替代码中已经使用的 SqlSession**
 
-sqlSessionTemplate 是 mybatis-spring 的核心
-
-作为 SqlSession 的一个实现，它可以**无缝代替代码中已经使用的 SqlSession**
 
 ```xml
 <!--    SqlSessionTemplate: 相当于sqlSession-->
@@ -1808,8 +1992,6 @@ sqlSessionTemplate 是 mybatis-spring 的核心
             <constructor-arg index="0" ref="sqlSessionFactory"/>
         </bean>
 ```
-
-
 
 + 给接口加实现类（UserMapperImpl）
 
@@ -1836,10 +2018,7 @@ public class UserMapperImpl implements UserMapper {
         return mapper.selectUser();
     }
 }
-
 ```
-
-
 
 + 将实现类注入到Spring中（applicationContext.xml）
 
@@ -1857,8 +2036,6 @@ public class UserMapperImpl implements UserMapper {
     </bean>
 </beans>
 ```
-
-
 
 + 测试，验证功能
 
@@ -1889,7 +2066,7 @@ sqlSessionDaoSupport 是一个抽象的支持类，用来提供 SqlSessionTempla
 
 调用 getSqlSession() 方法就会得到一个 SqlSessionTemplate，之后可以用于执行 SQL 方法
 
-这样可以不用注入 SqlSessionFactory，因为在继承的抽象类里已经写好了
+这样**可以不用注入 SqlSessionFactory**，因为在继承的抽象类里已经写好了
 
 也可以不用写 SqlSessionTemplate 的 set 方法，因为在继承的抽象类中已经赋值了
 
