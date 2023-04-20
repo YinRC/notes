@@ -164,6 +164,62 @@ git rm --cached note.txt 从暂存区删除
 
 
 
+### 如何 clone 指定的分支
+
+要克隆 Git 项目的不同分支，可以使用以下命令：
+
+```
+git clone -b <branch_name> <remote_repo_url>
+```
+
+其中，`<branch_name>` 是要克隆的分支名称，`<remote_repo_url>` 是远程 Git 仓库的 URL。
+
+例如，如果要克隆名为`my-branch`的分支，可以使用以下命令：
+
+```
+git clone -b my-branch https://github.com/myuser/myproject.git
+```
+
+这将克隆远程 Git 仓库 `https://github.com/myuser/myproject.git` 的 `my-branch` 分支到当前目录下的 `myproject` 目录中。
+
+如果您已经克隆了项目，可以在项目目录中使用以下命令来获取特定分支的更新：
+
+```
+git checkout <branch_name>
+```
+
+其中，`<branch_name>` 是要检出的分支名称。这将切换您的本地 Git 仓库到特定分支，以便您可以访问和修改该分支的代码。
+
+### clone 指定 tag 呢
+
+要克隆 Git 项目的指定 tag，可以使用以下命令：
+
+```
+git clone --branch <tag_name> --single-branch <remote_repo_url>
+```
+
+其中，`<tag_name>` 是要克隆的 tag 名称，`<remote_repo_url>` 是远程 Git 仓库的 URL。
+
+例如，如果要克隆名为`v1.0.0`的 tag，可以使用以下命令：
+
+```
+git clone --branch v1.0.0 --single-branch https://github.com/myuser/myproject.git
+```
+
+这将克隆远程 Git 仓库 `https://github.com/myuser/myproject.git` 的 `v1.0.0` tag 到当前目录下的 `myproject` 目录中。
+
+如果您已经克隆了项目，可以在项目目录中使用以下命令来获取指定 tag 的更新：
+
+```
+git checkout <tag_name>
+```
+
+其中，`<tag_name>` 是要检出的 tag 名称。这将切换您的本地 Git 仓库到指定的 tag，以便您可以访问和修改该 tag 的代码。
+
+
+
+
+
 ## 7. 异常情况
 
 ### 7.1 ssh-add 异常

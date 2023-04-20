@@ -222,7 +222,168 @@ server.port=1234
 + 找出所有的应用程序监听器，设置到 listeners 属性中
 + 推断并设置 main 方法的定义类，找到运行的主类
 
-# 3. SpringBoot 配置
+# 3 原理初探（自动配置）
+
+## 3.1 pom.xml
+
+`pom < spring-boot-starter-parent < spring-boot-dependencies`
+
++ ../ spring-boot-starter-parent
+    + 资源过滤 `<resources>`
++ ../../ spring-boot-dependencies 
+    + 核心依赖 `<dependencyManagement>`
+    + `<properties>` 为核心依赖指定版本
++ `<dependencies>` 中的 starter（启动器）中指定了所需依赖的版本
++ 启动器可以理解为 SpringBoot 的功能场景，导入 xx 环境所需的依赖
+
+## 3.2 主程序（xxxApplication.java）
+
+```java
+package com.isaiah;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+// 标注这个类是一个 SpringBoot 应用
+@SpringBootApplication
+public class Springboot01HelloworldApplication {
+    // 将 SpringBoot 应用启动
+    public static void main(String[] args) {
+        SpringApplication.run(Springboot01HelloworldApplication.class, args);
+    }
+}
+```
+
+### 3.2.1 类上的注解（@SpringBootApplication）
+
+`@SpringBootApplication `
+
+​				`< @SpringBootConfiguration / @EnableAutoConfiguration`
+
++ @SpringBootConfiguration ` < @Configuration < @Component`
+
+    + 代表 SpringBoot 的配置，是一个 spring 配置类，本质上是一个组件
+
++ @EnableAutoConfiguration 0
+
+    + @AutoConfigurationPackage 1
+
+        + @Import({AutoConfigurationPackages.Registrar.class}) 2
+
+            + AutoConfigurationPackages.java 3
+
+                + 通过元数据得到包名，注册包名
+
+                + ```java
+                    public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+                        AutoConfigurationPackages.register(registry, (String[])(new PackageImports(metadata)).getPackageNames().toArray(new String[0]));
+                    }
+                    ```
+
+    + @Import({AutoConfigurationImportSelector.class}) 1
+
+        + AutoConfigurationImportSelector.java 2
+
+            + ```java
+                // simplify
+                protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
+                    if (!this.isEnabled(annotationMetadata)) {
+                        return EMPTY_ENTRY;
+                    } else {
+                        // 获得所有的配置
+                        List<String> configurations = this.getCandidateConfigurations(annotationMetadata, attributes);
+                        configurations = this.removeDuplicates(configurations);
+                        Set<String> exclusions = this.getExclusions(annotationMetadata, attributes);
+                        return new AutoConfigurationEntry(configurations, exclusions);
+                    }
+                }
+                ```
+
+                + getCandidateConfigurations.java 3 获取候选的配置
+
+                    + ```java
+                        // 获取候选的配置
+                        protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+                            // 加载 getSpringFactoriesLoaderFactoryClass 和 getBeanClassLoader
+                            List<String> configurations = new ArrayList(SpringFactoriesLoader.loadFactoryNames(this.getSpringFactoriesLoaderFactoryClass(), this.getBeanClassLoader()));
+                            ImportCandidates.load(AutoConfiguration.class, this.getBeanClassLoader()).forEach(configurations::add);
+                            // 断言配置不为空 
+                            // META-INF/spring.factories 
+                            // META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+                            // 自动配置的核心文件
+                            Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories nor in META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports. If you are using a custom packaging, make sure that file is correct.");
+                            return configurations;
+                        }
+                        ```
+
+                        ![image-20230419231914509](springBoot.assets/image-20230419231914509.png)
+
+                        + getSpringFactoriesLoaderFactoryClass() 4
+
+                            + 加载标注了@EnableAutoConfiguration注解的类（比如主启动类）
+
+                                ![image-20230419231242984](springBoot.assets/image-20230419231242984.png)
+
+                        + getBeanClassLoader() 4
+
+                        + loadFactoryNames(getSpringFactoriesLoaderFactoryClass(), getBeanClassLoader()) 4
+
+                            + loadSpringFactories() 获取所有的加载配置
+
+                                + ```java
+                                    // 所有的资源加载到配置类中
+                                    Properties properties = PropertiesLoaderUtils.loadProperties(resource);
+                                    ```
+
+### 注意
+
+**关于spring.factories**
+
+spring.factories其实是SpringBoot提供的SPI机制，底层实现是基于SpringFactoriesLoader检索ClassLoader中所有jar（包括ClassPath下的所有模块）引入的META-INF/spring.factories文件，基于文件中的接口（或者注解）加载对应的实现类并且注册到IOC容器。这种方式对于@ComponentScan不能扫描到的并且想自动注册到IOC容器的使用场景十分合适，基本上绝大多数第三方组件甚至部分spring-projects中编写的组件都是使用这种方案。
+
+
+
+### 3.2.2 主类（PSVM）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 配置文件的作用：修改 springboot 自动配置的默认值，因为 springboot 在底层都给我们自动配置好了
 
