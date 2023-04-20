@@ -544,7 +544,7 @@ public class User {
 
 ## 6.3 拓展方式注入
 
-+ **p-namespace：**p 命名空间注入，可以直接为对象注入属性的值，**p 相当于 property**
++ **p-namespace：** p 命名空间注入，可以直接为对象注入属性的值，**p 相当于 property**
 
 ```xml
 xmlns:p="http://www.springframework.org/schema/p"
@@ -556,7 +556,7 @@ xmlns:p="http://www.springframework.org/schema/p"
 
 
 
-+ **c-namespace：**c 命名空间注入，通过构造器注入，**c 相当于 construct-args**
++ **c-namespace：** c 命名空间注入，通过构造器注入，**c 相当于 construct-args**
 
 ```xml
 xmlns:c="http://www.springframework.org/schema/c"
