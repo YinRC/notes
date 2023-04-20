@@ -556,7 +556,7 @@ xmlns:p="http://www.springframework.org/schema/p"
 
 
 
-+ **c-namespace：** c 命名空间注入，通过构造器注入，**c 相当于 construct-args**
++ **c-namespace：** c 命名空间注入，通过构造器注入，**c 相当于 construct-args**
 
 ```xml
 xmlns:c="http://www.springframework.org/schema/c"
@@ -713,7 +713,10 @@ expected single matching bean but found 2: cat11,cat22
 **注意：**
 
 + 有属性类型重复的情况只能用 byName
-+ set 方法的命名要和属性名对应，而不是与属性类型对应
++ set 方法的命名
+    + 参数列表的形式参数名要和属性名对应
+    + set 方法名不需要对应属性名
+
 
 ## 8.2 在 java 中显式地装配	@Autowired @Resource
 
