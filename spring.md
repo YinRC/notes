@@ -1383,7 +1383,7 @@ public class Main {
 }
 ```
 
-**from chat-gpt 1 interfaces 2 class**
+**from chat-gpt 1 interfaces 2 classes**
 
 ```java
 public interface MyInterface {

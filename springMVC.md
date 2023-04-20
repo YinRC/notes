@@ -26,7 +26,7 @@
 
 ## 1.2 form.jsp
 
-+ 响应 ${pageContextPath}/hello 的请求，使用 post 的方法进行提交
++ ${pageContextPath}/hello 的请求，使用 post 的方法进行提交
 + 输入框接收信息，name 属性值为 name，提交时生成 key 为 method 的键值对
 + submit 提交信息
 
