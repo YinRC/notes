@@ -2,12 +2,16 @@
 
 ## 1.1 hello word 中文乱码
 
+响应解码为 utf-8
+
 ```java
 response.setContentType("text/html");
 response.setCharacterEncoding("utf-8");
 ```
 
 ## 1.2 maven 依赖
+
+javax.servlet-api `java 扩展包`
 
 ```xml
 <dependency>
