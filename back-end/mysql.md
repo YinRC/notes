@@ -101,7 +101,7 @@ data                  YYYY-MM-DD                 日期格式
 
 time                  HH:mm:ss                       时间格式
 
-**datatime          YYYY-MM-DD HH:mm:ss 最常用的时间格式**
+**datetime          YYYY-MM-DD HH:mm:ss 最常用的时间格式**
 
 **timestamp       时间戳                              1970/1/1到现在的毫秒数**
 
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS `student`(
 
 
 CREATE TABLE [IF NOT EXISTS] `表名`(
-	`字段名` [列类型] [索引] [注释],
+		`字段名` [列类型] [索引] [注释],
     `字段名` [列类型] [索引] [注释],
     `字段名` [列类型] [索引] [注释],
     `字段名` [列类型] [索引] [注释]

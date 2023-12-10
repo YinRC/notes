@@ -1074,10 +1074,10 @@ public class MyTest {
 
 ### 11.1.1 静态代理组成部分
 
-+ **抽象角色 Rent：** 一般会使用接口或抽象类来解决
-+ **真实角色 Host： ** 被代理的角色
-+ **代理角色 Proxy：** 代理真实角色，代理之后一般会做一些附属操作
-+ **客户 Client：** 访问代理对象的人
++ **核心行为 Rent：** 一般会使用接口或抽象类来解决
++ **服务者 Host： ** 被代理
++ **加强版服务者 Proxy：** 代理原有的服务者，代理之后一般会做一些附属操作
++ **消费者 Client：** 访问代理服务的人
 
 
 
@@ -1111,7 +1111,8 @@ public class Host implements Rent {
 package com.isaiah.demo1;
 
 public class Proxy implements Rent {
-    private Host host;
+    
+  	private Host host;
 
     public Proxy() {
     }
@@ -1164,13 +1165,13 @@ public class Client {
 
 ### 11.2.3 代理模式的好处
 
-+ 可以**使真实角色的操作更加纯粹**，不用去关注一些公共的业务
-+ **公共业务交给了代理角色**，实现了业务的分工
++ 可以**使真实对象的操作更加纯粹**，不用去关注一些公共的业务
++ **公共业务由代理实现**，实现了业务的分工
 + 公共业务扩展的时候，**方便集中管理**
 
 ### 11.2.4 代理模式的缺点
 
-+ 一个真实角色就会产生一个代理角色，代码量会翻倍，开发效率会变低
++ **一个真实角色就会产生一个代理角色**，代码量会翻倍，开发效率会变低
 
 ![image-20230220164821557](./spring.assets/image-20230220164821557.png)
 
@@ -1225,9 +1226,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-// 我们会用这个类自动生成代理类
+// 我们会用这个类自动生成代理类：设置被代理的服务，生成代理类getter，实现InvocationHandler的invoke方法
 public class ProxyInvocationHandler implements InvocationHandler {
-    // 被代理的接口
+    
+  	// 被代理的接口
     private Rent rent;
 
     public void setRent(Rent rent) {
@@ -1242,10 +1244,10 @@ public class ProxyInvocationHandler implements InvocationHandler {
     // 处理代理类，并返回结果
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        seeHouse();
+        seeHouse();	// 看房子
         // 动态代理的本质，就是使用反射机制实现!
         Object invoke = method.invoke(rent, args);
-        charge();
+        charge();	// 收中介费
         return invoke;
     }
 
@@ -1297,7 +1299,8 @@ public class UserServiceImpl implements UserService {
 
 // 动态代理处理器
 public class LoggingInvocationHandler implements InvocationHandler {
-    private Object target;
+    
+  	private Object target;
 
     public LoggingInvocationHandler(Object target) {
         this.target = target;
@@ -1352,7 +1355,8 @@ public class MyService implements UserService, ProductService {
 }
 
 public class LoggingInvocationHandler implements InvocationHandler {
-    private Object target;
+    
+  	private Object target;
 
     public LoggingInvocationHandler(Object target) {
         this.target = target;
@@ -1373,7 +1377,7 @@ public class Main {
         InvocationHandler handler = new LoggingInvocationHandler(myService);
         Object proxy = Proxy.newProxyInstance(
                 myService.getClass().getClassLoader(),
-                new Class[] { UserService.class, ProductService.class },
+                new Class[] { UserService.class, ProductService.class },	// 对多个接口统一代理
                 handler);
         UserService userService = (UserService)proxy;
         ProductService productService = (ProductService)proxy;
@@ -1390,49 +1394,69 @@ public interface MyInterface {
     void doSomething();
 }
 
-public class MyClassA implements MyInterface {
+------------------------------------------------------------------
+
+// 实现 1
+public class MyClass1 implements MyInterface {
+    @Override
     public void doSomething() {
-        System.out.println("MyClassA doSomething()");
+        System.out.println("Doing something in MyClass1");
     }
 }
 
-public class MyClassB implements MyInterface {
+// 实现 2
+public class MyClass2 implements MyInterface {
+    @Override
     public void doSomething() {
-        System.out.println("MyClassB doSomething()");
+        System.out.println("Doing something in MyClass2");
     }
 }
 
-public class LoggingInvocationHandler implements InvocationHandler {
-    private List<Object> targets;
+------------------------------------------------------------------
 
-    public LoggingInvocationHandler(List<Object> targets) {
-        this.targets = targets;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+
+public class MyProxyHandler implements InvocationHandler {
+    private Object target;
+
+    public MyProxyHandler(Object target) {
+        this.target = target;
     }
 
-    public Object invoke(Object proxy, Method method, Object[] args)
-            throws Throwable {
-        System.out.println("Before method " + method.getName());
-        for (Object target : targets) {
-            method.invoke(target, args);
-        }
-        System.out.println("After method " + method.getName());
-        return null;
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        System.out.println("Before method invocation");
+        Object result = method.invoke(target, args);
+        System.out.println("After method invocation");
+        return result;
     }
 }
+
+------------------------------------------------------------------
+
+import java.lang.reflect.Proxy;
+
+// 生成代理对象的工厂
+public class ProxyFactory {
+    public static Object createProxy(Object target) {
+        return Proxy.newProxyInstance(
+                target.getClass().getClassLoader(),
+                target.getClass().getInterfaces(),
+                new MyProxyHandler(target)
+        );
+    }
+}
+
+------------------------------------------------------------------
 
 public class Main {
     public static void main(String[] args) {
-        MyClassA myClassA = new MyClassA();
-        MyClassB myClassB = new MyClassB();
-        List<Object> targets = new ArrayList<>();
-        targets.add(myClassA);
-        targets.add(myClassB);
-        InvocationHandler handler = new LoggingInvocationHandler(targets);
-        MyInterface proxy = (MyInterface) Proxy.newProxyInstance(
-                Main.class.getClassLoader(),
-                new Class[] { MyInterface.class },
-                handler);
-        proxy.doSomething();
+        MyInterface proxy1 = (MyInterface) ProxyFactory.createProxy(new MyClass1());
+        MyInterface proxy2 = (MyInterface) ProxyFactory.createProxy(new MyClass2());
+
+        proxy1.doSomething();
+        proxy2.doSomething();
     }
 }
 ```
@@ -1442,7 +1466,7 @@ public class Main {
 ### 11.2.2 动态代理的好处
 
 + 一个动态代理类**代理的是一个接口，一般就是对应一类业务**
-+ 同上，一个动态代理类可以代理多个类，只要是实现了同一个接口即可
++ 同上，一个**动态代理类可以代理多个类，只要是实现了同一个接口即可**
 
 
 
@@ -1454,7 +1478,7 @@ AOP（Aspect Oriented Programming）意为：**面向切面编程**
 
 通过**预编译**方式和运行期**动态代理**，实现程序公共能的统一维护
 
-AOP 是 OOP 的延续，是软件开发中的一个热点，是函数式变成的一种衍生泛型
+AOP 是 OOP 的延续，是软件开发中的一个热点，是函数式编程的一种衍生泛型
 
 利用 AOP 可以**对业务逻辑中的各个部分进行隔离**，从而使业务逻辑的各个部分之间的耦合度降低
 
@@ -1462,10 +1486,10 @@ AOP 是 OOP 的延续，是软件开发中的一个热点，是函数式变成�
 
 提供**声明式事务**；允许用户自定义切面
 
-+ 横切关注点：跨越应用程序多个模块的方法和功能（日志，安全，缓存，，）
++ 横切关注点：跨越多个模块的方法和功能（日志，安全，缓存，，）
 + 切面（Aspect）：横切关注点模块化的特殊对象，是一个**类**
-+ 通知（Advice）：切面必须要完成的工作，是一个类中的**方法**
-+ 目标（Target）：被通知的**对象**
++ 通知（Advice）：切面要完成的工作，是一个类中的**方法**
++ 目标（Target）：被代理的**对象**
 + 代理（Proxy）：向目标对象**应用通知之后创建的对象**
 + 切入点（PointCut）：切面通知执行的**”地点“**的定义
 + 连接点（JointPoint）：**与切入点匹配的执行点**

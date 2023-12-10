@@ -41,7 +41,7 @@ $ git clone xxx
 
 **本地仓库** Local Repository `.git/objects`
 
-<img src="E:\github\notes\maintenance\git.assets\image-20230818124007057.png" alt="image-20230818124007057" style="zoom:67%;" />
+<img src=".\git.assets\image-20230818124007057.png" alt="image-20230818124007057" style="zoom:67%;" />
 
 ## 2.2 四个状态
 
@@ -53,7 +53,7 @@ $ git clone xxx
 
 **已暂存** staged
 
-<img src="E:\github\notes\maintenance\git.assets\image-20230818124251870.png" alt="image-20230818124251870" style="zoom:67%;" />
+<img src=".\git.assets\image-20230818124251870.png" alt="image-20230818124251870" style="zoom:67%;" />
 
 ```bash
 git status # 查看仓库状态
@@ -66,7 +66,7 @@ git log #查看仓库提交的历史记录，可以使用 --oneline 设置单行
 
 # 3. git reset 回退版本
 
-<img src="E:\github\notes\maintenance\git.assets\image-20230818125552589.png" alt="image-20230818125552589" style="zoom:67%;" />
+<img src=".\git.assets\image-20230818125552589.png" alt="image-20230818125552589" style="zoom:67%;" />
 
 ```bash
 
