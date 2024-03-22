@@ -38,6 +38,45 @@
 
  
 
+**Martin Fowler**
+
+![image-20240123130626412](springBoot.assets/image-20240123130626412.png)
+
+
+
+**1. 简而言之微服务是什么？**
+
++ 以开发**一组小型服务的方式**来开发一个**独立的应用系统**
++ 其中每个小型服务都运行在自己的**进程**中，并经常采用**HTTP资源API**这样轻量的机制来相互通信
++ 这些微服务可以使用**不同的语言**来编写，并且可以使用**不同的数据存储技术**
++ 对这些微服务，我们仅做**最低限度的集中管理**
+
+
+
+**2. 单块应用系统 monolithic**
+
++ 处理用户请求的所有逻辑都运行在一个单个的进程内
++ 使用编程语言的基本特性，来把应用系统划分为类、函数和命名空间
++ 通过负载均衡器运行许多实例，来将这个单块应用进行横向扩展
++ 应用系统中一个很小部分的一处变更，也需要将整个单块应用系统进行重新构建和部署
++ 单块应用逐渐难以保持一个良好的模块化结构，这使得它变得**越来越难以将一个模块的变更所产生的影响控制在该模块内**
++ 当对系统进行扩展时，**不得不扩展整个应用系统**，而不能仅扩展该系统中需要更多资源的那些部分
+
+
+
+**3. 一些类比**
+
++ 我们将**软件库(libraries)**定义为这样的组件，即它能被**链接到一段程序**，且能**通过内存中的函数来进行调用**
++ **服务(services)是进程外的组件**，它们通过诸如web service请求或远程过程调用这样的机制来进行通信
+
+
+
+
+
+
+
+
+
 # 2. 第一个程序
 
 ## 2.1 开发环境
@@ -163,7 +202,7 @@ public class HelloworldApplication {
 server.port=1234
 ```
 
-自定义 banner： 在 resources 下新建一个 banner.txt
+自定义 banner： 在 resources 下新建一个 `banner.txt`
 
 ```properties
  __       _______.     ___       __       ___       __    __  
@@ -179,15 +218,15 @@ server.port=1234
 
 ### 2.5.1 pom.xml
 
-+ 核心依赖在父工程中 spring-boot-dependencies **\<dependencyManagement\>**
-+ 我们使用依赖不需要指定版本，因为 spring-boot-dependencies **\<properties\>** 中指定了版本
++ **核心依赖在父工程中** `spring-boot-dependencies` **\<dependencyManagement\>**
++ 我们使用依赖**不需要指定版本**，因为 `spring-boot-dependencies` **\<properties\>** 中指定了版本
 
 ### 2.5.2 启动器
 
-比如 spring-boot-starter-web 会帮我们自动导入 web 环境所需的所有依赖
+比如 `spring-boot-starter-web` 会帮我们自动导入 web 环境所需的所有依赖
 
-+ springboot 将所有的功能场景都封装成了一个个的启动器
-+ 我们想要什么功能，就启动对应的启动器 `starter`
++ springboot 将所有的**功能场景**都封装成了一个个的启动器
++ 我们想要什么功能，就在 pom 加入对应的启动器 `starter` 即可
 
 ### 2.5.3 主程序
 
@@ -222,7 +261,7 @@ server.port=1234
 + 找出所有的应用程序监听器，设置到 listeners 属性中
 + 推断并设置 main 方法的定义类，找到运行的主类
 
-# 3 原理初探（自动配置）
+# 3. 原理初探（自动配置）
 
 ## 3.1 pom.xml
 
@@ -254,7 +293,7 @@ public class Springboot01HelloworldApplication {
 }
 ```
 
-### 3.2.1 类上的注解（@SpringBootApplication）
+### 3.2.1 @SpringBootApplication
 
 `@SpringBootApplication `
 
@@ -335,67 +374,314 @@ public class Springboot01HelloworldApplication {
                                     Properties properties = PropertiesLoaderUtils.loadProperties(resource);
                                     ```
 
-### 注意
-
 **关于spring.factories**
 
 spring.factories其实是SpringBoot提供的SPI机制，底层实现是基于SpringFactoriesLoader检索ClassLoader中所有jar（包括ClassPath下的所有模块）引入的META-INF/spring.factories文件，基于文件中的接口（或者注解）加载对应的实现类并且注册到IOC容器。这种方式对于@ComponentScan不能扫描到的并且想自动注册到IOC容器的使用场景十分合适，基本上绝大多数第三方组件甚至部分spring-projects中编写的组件都是使用这种方案。
 
 
 
-### 3.2.2 主类（PSVM）
+### 3.2.2 主类自动装配
+
++ 推断应用的类型：普通项目、web 项目
++ 查找并加载所有可用的初始化器，设置到 `initializers` 属性中
++ 找出所有的应用程序监听器，设置到 `listeners` 属性中
++ 推断并设置 main 方法的定义类并找到运行的主类
+
+![img](springBoot.assets/f4bd913174bfe3c674ff49d780a7bf23.png)
+
+# 4. yaml 语法
+
++ `application.properties`
+  + key = value
++ `application.yaml`
+  + key: 空格 value
 
 
 
+## 4.1 yaml VS properties
+
+```properties
+# 只能存键值对
+student.name = isaiah
+student.age = 3
+```
+
+```yaml
+# 对象
+student:
+  name: isaiah
+  age: 3
+# 行内写法
+student: {name: isaiah, age: 3}
+
+# 数组
+pets:
+ - cat
+ - dog
+ - pig
+# 行内写法
+pets: [cat, dog, pig]
+```
 
 
 
+## 4.2 为实体类赋值
 
 
 
+### 4.2.1 原生方式与 yaml 注入
+
++ 原生方式为实体类赋值
+
+```java
+package com.qm.boot.pojo;
+
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Data
+@Component
+public class Dog {
+    @Value("wang")
+    private String name;
+    @Value("3")
+    private Integer age;
+}
+```
+
++ yaml 为实体类赋值
+
+```yaml
+person:
+  name: isaiah
+  age: 3
+  happy: true
+  birth: 2023/11/24
+  maps: {k1: v1, k2: v2}
+  list:
+    - code
+    - music
+    - girl
+  dog:
+    name: wang
+    age: 3
+```
+
+```java
+package com.qm.boot.pojo;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+@Data
+@Component
+@ConfigurationProperties(prefix = "person") // 这个注解指定注入的信息
+public class Person {
+    private String name;
+    private Integer age;
+    private Boolean happy;
+    private Date birth;
+    private Map<String, Object> maps;
+    private List<Object> lists;
+
+    private Dog dog;
+}
+
+```
+
+```md
+// 失败
+Person(
+name=isaiah, 
+age=3, 
+happy=true, 
+birth=Fri Nov 24 00:00:00 CST 2023, 
+maps={k1=v1, k2=v2}, 
+lists=null, // 没有对应上所以为null
+dog=Dog(name=wang, age=3))
+
+// 成功
+Person(lists=[code, music, girl])
+```
+
+![image-20240124141119227](springBoot.assets/image-20240124141119227.png)
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-configuration-processor</artifactId>
+    <optional>true</optional>
+</dependency>
+```
+
++ `@ConfigurationPorperties(prefix = "person")` 作用：
+  + 将 `配置文件` 中配置的每一个属性的值映射到这个组件中
+  + 这里的配置文件当然是默认的 `application.xxx`
+  + 只用容器中的组件才能够使用这个功能
+
++ `@PropertiesSource(value = "classpath:isaiah.properties")`
+  + 指定 `配置文件` 的地址
+
+### 4.2.2 yaml 注入：使用EL表达式
+
+```yaml
+person:
+  name: isaiah${random.uuid} # 3d1b9356-ba3c-4404-8f73-c8fc1c5bb1a7
+  age: ${random.int(100)} # 91
+  happy: true
+  birth: 2023/11/24
+  maps: {k1: v1, k2: v2}
+  lists:
+    - code
+    - music
+    - girl
+  hello: happyHello
+  dog:
+    name: ${person.hello:hello}_wang # 三元表达式：happyHello_wang
+    age: 3
+```
 
 
 
+### 4.2.3 两种方式对比
+
+![image-20240124143451588](springBoot.assets/image-20240124143451588.png)
+
++ 松散绑定
+  + `last-name` 可以绑定类中的 `lastName`
+
++ JSR303
+  + JSR 是 Java Specification Requests 的缩写，即 Java 规范提案（Bean Validation (JSR 303)）
+  + @Length @Email @Pattern
+  + `@Length(max=5, message = "太长了")`
 
 
 
+# 5. 多环境配置
+
+1. `file:./config/`
+2. `file:./`
+3. `classpath:/config/`
+4. `classpath:/`
+
+```yaml
+server:
+	port: 8081
+spring:
+	profiles:
+		active: dev	# 选择要激活哪个配置环境
+--
+server:
+	port: 8082
+spring:
+	profiles: dev	# 配置环境的名称
+	
+--
+server:
+	port: 8083
+spring:
+	profiles: test	# 配置环境的名称
+```
 
 
 
+# 6. 自动配置原理
+
+## 6.1 详细原理
+
++ `@SpringBootApplicaiton`
+
++ `@EnableAutoConfiguration`
+
++ `@Import(AutoConfigurationImportSelector.class)`
+
+  + `@Import` 指定类的加载优先于本身的类加载
+
+  + 指定实现 `ImportSelector` 的类可以实现个性化加载
+
+  + `ImportSelector` 收集需要导入的配置类配合 `@Enablexxx` 注解使用
+
+  + ```java
+    package com.test;
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    @Target(ElementType.TYPE)
+    @Import(ServiceImportSelector.class)
+    @interface EnableService {
+        String name();
+    }
+    
+    class ServiceImportSelector implements ImportSelector {
+        @Override
+        public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+            //这里的importingClassMetadata针对的是使用@EnableService的非注解类
+            //因为`AnnotationMetadata`是`Import`注解所在的类属性，如果所在类是注解类，则延伸至应用这个注解类的非注解类为止
+            Map<String , Object> map = importingClassMetadata.getAnnotationAttributes(EnableService.class.getName(), true);
+            String name = (String) map.get("name");
+            if (Objects.equals(name, "B")) {
+                return new String[]{"com.test.ConfigB"};
+            }
+            return new String[0];
+        }
+    }
+    ```
+
+  + ```java
+    // 之后，在ConfigA中增加注解@EnableService(name = "B")
+    package com.test;
+    @EnableService(name = "B")
+    @Configuration
+    class ConfigA {
+        @Bean
+        @ConditionalOnMissingBean
+        public ServiceInterface getServiceA() {
+            return new ServiceA();
+        }
+    }
+    // 输出：ServiceB
+    ```
+
++ `springboot` 会实现很多 `xxxAutoConfiguration` 类，其上会有 `@EnableConfigurationProperties` 注解
+
+  + 这个注解会引入若干配置属性 `xxxProperties.class` 其上会有 `@ConfigurationProperties(prefix = "xxx")` 注解
+  + `server: port: 8080`
+  + `@ConfigurationProperties(prefix="server", ignoreUnknownFields=true)`
+  + 这个类所有的属性就是可以在 yaml 配置的东西（它们都要实现 `set方法`）
+  + 这些类的命名规则为 `xxxProperties.java` 例如 `ServerProperties.java`
+
+
++ 还会有 `@ConditionalOnXXX` 注解来判断是否满足指定条件
+
+> **@ConditionalOnBean**：仅仅在当前上下文中存在某个对象时，才会实例化一个Bean。
+> **@ConditionalOnClass**：某个class位于类路径上，才会实例化一个Bean。
+> **@ConditionalOnExpression**：当表达式为true的时候，才会实例化一个Bean。
+> **@ConditionalOnMissingBean**：仅仅在当前上下文中不存在某个对象时，才会实例化一个Bean。
+> **@ConditionalOnMissingClass**：某个class类路径上不存在的时候，才会实例化一个Bean。
+> **@ConditionalOnNotWebApplication**：不是web应用，才会实例化一个Bean。
+> **@ConditionalOnBean**：当容器中有指定Bean的条件下进行实例化。
+> **@ConditionalOnMissingBean**：当容器里没有指定Bean的条件下进行实例化。
+> **@ConditionalOnClass**：当classpath类路径下有指定类的条件下进行实例化。
+> **@ConditionalOnMissingClass**：当类路径下没有指定类的条件下进行实例化。
+> **@ConditionalOnWebApplication**：当项目是一个Web项目时进行实例化。
+> **@ConditionalOnNotWebApplication**：当项目不是一个Web项目时进行实例化。
+> **@ConditionalOnProperty**：当指定的属性有指定的值时进行实例化。
+> **@ConditionalOnExpression**：基于SpEL表达式的条件判断。
+> **@ConditionalOnJava**：当JVM版本为指定的版本范围时触发实例化。
+> **@ConditionalOnResource**：当类路径下有指定的资源时触发实例化。
+> **@ConditionalOnJndi**：在JNDI存在的条件下触发实例化。
+> **@ConditionalOnSingleCandidate**：当指定的Bean在容器中只有一个，或者有多个但是指定了首选的Bean时触发实例化。
 
 
 
+## 6.2 粗略总结
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-配置文件的作用：修改 springboot 自动配置的默认值，因为 springboot 在底层都给我们自动配置好了
-
-<img src="springBoot.assets/image-20230411213302327.png" alt="image-20230411213302327" style="zoom:67%;" />
-
-
-
-![image-20230411214113578](springBoot.assets/image-20230411214113578.png)
-
-![image-20230411214846024](springBoot.assets/image-20230411214846024.png)
-
-![image-20230411215124822](springBoot.assets/image-20230411215124822.png)
-
-![image-20230412142838346](springBoot.assets/image-20230412142838346.png)
-
+1. spring boot 启动会加载大量的自动配置类
+2. 我们进行开发时，先要看需要的功能是不是被这些自动配置类实现了
+3. 
